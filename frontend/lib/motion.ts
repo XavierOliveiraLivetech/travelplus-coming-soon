@@ -48,11 +48,12 @@ export const staggerPassThrough: Variants = {
 
 const gallerySlideEase: Transition["ease"] = [0.33, 0.08, 0.2, 1];
 
+/** direction > 0 = next (enter from right); direction < 0 = previous */
 export const gallerySlide: Variants = {
-  enter: {
-    x: "-28%",
+  enter: (direction: number) => ({
+    x: direction >= 0 ? "28%" : "-28%",
     opacity: 0,
-  },
+  }),
   center: {
     x: 0,
     opacity: 1,
@@ -61,14 +62,14 @@ export const gallerySlide: Variants = {
       ease: gallerySlideEase,
     },
   },
-  exit: {
-    x: "28%",
+  exit: (direction: number) => ({
+    x: direction >= 0 ? "-28%" : "28%",
     opacity: 0,
     transition: {
       duration: 0.85,
       ease: gallerySlideEase,
     },
-  },
+  }),
 };
 
 export const operatorGrid: Variants = {

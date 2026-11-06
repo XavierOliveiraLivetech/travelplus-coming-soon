@@ -59,6 +59,16 @@ body {
   overflow-y: auto;
 }
 
+/* Pass-through shell; scales the UI on ultrawide without touching the background */
+.coming-soon-scale {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
 .coming-soon-background {
   position: fixed;
   inset: 0;
@@ -531,6 +541,13 @@ body {
   overflow: hidden;
   background: transparent;
   line-height: 0;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.gallery-stage:active {
+  cursor: grabbing;
 }
 
 .gallery-slide {
@@ -538,6 +555,12 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.gallery-slide:active {
+  cursor: grabbing;
 }
 
 .gallery-image {
@@ -546,6 +569,9 @@ body {
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .gallery-operators {
@@ -558,8 +584,8 @@ body {
 
 .gallery-operators-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: clamp(0.55rem, 1.8vw, 0.9rem);
   width: 100%;
   height: 100%;
@@ -577,9 +603,9 @@ body {
   min-height: 0;
   padding: clamp(0.45rem, 1.4vw, 0.7rem);
   border-radius: 10px;
-  background: rgb(255, 255, 255);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .gallery-operator-logo {
@@ -600,7 +626,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 0.75rem;
   margin-top: 1rem;
   min-width: 0;
   text-align: center;
@@ -625,14 +651,34 @@ body {
   white-space: pre-wrap;
 }
 
-.gallery-title-caret {
-  display: inline-block;
-  width: 0.08em;
-  height: 1em;
-  margin-left: 0.12em;
+.gallery-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.gallery-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gallery-dot:hover,
+.gallery-dot:focus-visible {
+  background: rgba(255, 255, 255, 0.7);
+  outline: none;
+}
+
+.gallery-dot.is-active {
   background: var(--brand-orange);
-  border-radius: 1px;
-  transform: translateY(0.05em);
+  transform: scale(1.15);
 }
 
 /* —— Breakpoints —— */
@@ -842,6 +888,23 @@ body {
   .gallery {
     max-width: 100%;
   }
+
+  .gallery-operators-grid {
+    gap: clamp(0.35rem, 1.5vw, 0.55rem);
+    padding: clamp(0.3rem, 1.2vw, 0.5rem);
+  }
+
+  .gallery-operator {
+    padding: clamp(0.3rem, 1.2vw, 0.5rem);
+  }
+
+  .gallery-operator-logo {
+    max-height: 2.6rem;
+  }
+
+  .gallery-operator-logo--solferias {
+    max-height: 3.2rem;
+  }
 }
 
 @media (max-width: 500px) {
@@ -883,6 +946,27 @@ body {
     min-width: 0;
     max-width: none;
     margin-inline: 0;
+  }
+}
+
+/*
+  Ultrawide / >2560px: lock the UI to a 2560px design canvas, then scale it
+  up with the viewport so text, form, gallery, etc. keep the same relative
+  size as on a 2560px monitor. Background stays full-bleed (outside this shell).
+*/
+@media (min-width: 2561px) {
+  .coming-soon-page {
+    overflow: hidden;
+  }
+
+  .coming-soon-scale {
+    flex: none;
+    width: 2560px;
+    height: calc(100dvh * 2560px / 100vw);
+    min-height: calc(100dvh * 2560px / 100vw);
+    margin-inline: auto;
+    transform: scale(calc(100vw / 2560px));
+    transform-origin: top center;
   }
 }
 

@@ -27,15 +27,14 @@ type GalleryOperatorsItem = {
 type GalleryItem = GalleryImageItem | GalleryOperatorsItem;
 
 const OPERATOR_LOGOS = [
-  { id: "newblue", src: withBasePath("/Logos/Operadores/newblue.png"), alt: "Newblue" },
-  { id: "nortravel", src: withBasePath("/Logos/Operadores/nortravel.png"), alt: "Nortravel" },
-  { id: "solferias", src: withBasePath("/Logos/Operadores/solferias.svg"), alt: "Sol Férias" },
-  { id: "soltropico", src: withBasePath("/Logos/Operadores/Soltropico.png"), alt: "Soltrópico" },
+    { id: "newblue", src: withBasePath("/Logos/Operadores/newblue.png"), alt: "Newblue" },
+    { id: "nortravel", src: withBasePath("/Logos/Operadores/nortravel.png"), alt: "Nortravel" },
+    { id: "solferias", src: withBasePath("/Logos/Operadores/solferias.svg"), alt: "Sol Férias" },
+    { id: "soltropico", src: withBasePath("/Logos/Operadores/Soltropico.png"), alt: "Soltrópico" },
+    { id: "viajartours", src: withBasePath("/Logos/Operadores/viajartours.png"), alt: "Viajar Tours" },
   { id: "soltour", src: withBasePath("/Logos/Operadores/soltour.png"), alt: "Soltour" },
   { id: "travelplan", src: withBasePath("/Logos/Operadores/travelplan.png"), alt: "Travelplan" },
   { id: "tui", src: withBasePath("/Logos/Operadores/tui.png"), alt: "TUI" },
-  { id: "viajartours", src: withBasePath("/Logos/Operadores/viajartours.png"), alt: "Viajar Tours" },
-  { id: "w2m", src: withBasePath("/Logos/Operadores/w2m.png"), alt: "W2M" },
 ] as const;
 
 const ITEMS: GalleryItem[] = [
@@ -54,7 +53,7 @@ const ITEMS: GalleryItem[] = [
   {
     id: "proposta",
     kind: "image",
-    title: "Orçamento em 3 minutos",
+    title: "Orçamento prontos em 3 minutos",
     src: withBasePath("/Img/sneaks/orcamento.png"),
     alt: "Pré-visualização do orçamento rápido",
   },
@@ -72,10 +71,15 @@ const OPERATORS_ADVANCE_MS = 11000;
 const TYPE_MS = 42;
 const ERASE_MS = 28;
 const HOLD_MS = 180;
+const SWIPE_OFFSET_PX = 56;
+const SWIPE_VELOCITY = 450;
+
+function wrapIndex(index: number, length: number) {
+  return ((index % length) + length) % length;
+}
 
 function TypewriterCaption({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState(text);
-  const [isTyping, setIsTyping] = useState(false);
   const displayedRef = useRef(displayed);
   const targetRef = useRef(text);
   const timersRef = useRef<number[]>([]);
@@ -104,7 +108,6 @@ function TypewriterCaption({ text }: { text: string }) {
     if (prefersReducedMotion) {
       clearTimers();
       setDisplayed(text);
-      setIsTyping(false);
       return;
     }
 
@@ -113,7 +116,6 @@ function TypewriterCaption({ text }: { text: string }) {
     }
 
     clearTimers();
-    setIsTyping(true);
 
     const eraseThenType = () => {
       const current = displayedRef.current;
@@ -131,7 +133,6 @@ function TypewriterCaption({ text }: { text: string }) {
       const target = targetRef.current;
 
       if (index >= target.length) {
-        setIsTyping(false);
         return;
       }
 
@@ -147,16 +148,6 @@ function TypewriterCaption({ text }: { text: string }) {
   return (
     <p className="gallery-title" aria-label={text}>
       <span className="gallery-title-text">{displayed}</span>
-      <motion.span
-        className="gallery-title-caret"
-        aria-hidden="true"
-        animate={{ opacity: isTyping ? [1, 1] : [1, 0, 1] }}
-        transition={
-          isTyping
-            ? { duration: 0 }
-            : { duration: 0.9, repeat: Infinity, ease: "linear" }
-        }
-      />
     </p>
   );
 }
@@ -191,7 +182,17 @@ function OperatorsSlide() {
 
 export default function Gallery() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
   const active = ITEMS[activeIndex];
+
+  const goTo = (nextIndex: number, nextDirection: number) => {
+    setDirection(nextDirection);
+    setActiveIndex(wrapIndex(nextIndex, ITEMS.length));
+  };
+
+  const paginate = (step: number) => {
+    goTo(activeIndex + step, step);
+  };
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -208,10 +209,12 @@ export default function Gallery() {
         : AUTO_ADVANCE_MS;
 
     const timer = window.setTimeout(() => {
-      setActiveIndex((current) => (current + 1) % ITEMS.length);
+      paginate(1);
     }, delay);
 
     return () => window.clearTimeout(timer);
+    // Intentionally keyed only on activeIndex so auto-advance resets on every slide change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex]);
 
   return (
@@ -221,14 +224,31 @@ export default function Gallery() {
       variants={fadeUp}
     >
       <figure className="gallery-stage">
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={active.id}
             className="gallery-slide"
+            custom={direction}
             variants={gallerySlide}
             initial="enter"
             animate="center"
             exit="exit"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.18}
+            onDragEnd={(_, info) => {
+              const { offset, velocity } = info;
+              const swipedNext =
+                offset.x < -SWIPE_OFFSET_PX || velocity.x < -SWIPE_VELOCITY;
+              const swipedPrev =
+                offset.x > SWIPE_OFFSET_PX || velocity.x > SWIPE_VELOCITY;
+
+              if (swipedNext) {
+                paginate(1);
+              } else if (swipedPrev) {
+                paginate(-1);
+              }
+            }}
           >
             {active.kind === "operators" ? (
               <div className="gallery-operators">
@@ -242,6 +262,7 @@ export default function Gallery() {
                 className="gallery-image"
                 loading="eager"
                 decoding="async"
+                draggable={false}
               />
             )}
           </motion.div>
@@ -250,6 +271,33 @@ export default function Gallery() {
 
       <div className="gallery-meta">
         <TypewriterCaption text={active.title} />
+        <div
+          className="gallery-dots"
+          role="tablist"
+          aria-label="Navegação da galeria"
+        >
+          {ITEMS.map((item, index) => {
+            const isActive = index === activeIndex;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                className={`gallery-dot${isActive ? " is-active" : ""}`}
+                aria-label={`Ir para ${item.title}`}
+                aria-selected={isActive}
+                onClick={() => {
+                  if (index === activeIndex) {
+                    return;
+                  }
+
+                  goTo(index, index > activeIndex ? 1 : -1);
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
     </motion.aside>
   );
