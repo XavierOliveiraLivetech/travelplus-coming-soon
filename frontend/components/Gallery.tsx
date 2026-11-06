@@ -53,7 +53,7 @@ const ITEMS: GalleryItem[] = [
   {
     id: "proposta",
     kind: "image",
-    title: "Orçamento prontos em 3 minutos",
+    title: "Orçamento pronto em 3 minutos",
     src: withBasePath("/Img/sneaks/orcamento.png"),
     alt: "Pré-visualização do orçamento rápido",
   },
