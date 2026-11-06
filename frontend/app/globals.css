@@ -1,0 +1,943 @@
+:root {
+  --background: #0a1628;
+  --foreground: #ffffff;
+  --brand-orange: #d87225;
+  --brand-orange-hover: #c2651f;
+  --overlay: rgba(6, 14, 26, 0.48);
+  --overlay-deep: rgba(4, 10, 20, 0.72);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 4px 18px rgba(0, 0, 0, 0.4);
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --page-pad-x: clamp(1rem, 4vw, 2.5rem);
+  --page-pad-y: clamp(0.75rem, 2.5vh, 2rem);
+  --logo-size: clamp(5.5rem, 18vw, 9rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* —— Coming Soon page shell —— */
+
+.coming-soon-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  min-height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.coming-soon-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.coming-soon-background-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.coming-soon-background-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.coming-soon-background-video.is-ready {
+  opacity: 1;
+}
+
+.coming-soon-background-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 85% 70% at 50% 48%,
+      rgba(4, 10, 20, 0.4) 0%,
+      rgba(4, 10, 20, 0.14) 55%,
+      transparent 75%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(6, 14, 26, 0.32) 0%,
+      var(--overlay) 42%,
+      var(--overlay-deep) 100%
+    );
+  pointer-events: none;
+}
+
+.coming-soon-header,
+.coming-soon-footer {
+  display: flex;
+  align-items: center;
+  padding-inline: max(var(--page-pad-x), env(safe-area-inset-left, 0px))
+    max(var(--page-pad-x), env(safe-area-inset-right, 0px));
+  flex-shrink: 0;
+}
+
+.coming-soon-header {
+  justify-content: flex-start;
+  height: fit-content;
+  min-height: 0;
+  padding-top: max(var(--page-pad-x), env(safe-area-inset-top, 0px));
+  padding-bottom: 0;
+}
+
+.coming-soon-footer {
+  justify-content: center;
+  min-height: 0;
+  padding-top: 0.5rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  text-align: center;
+}
+
+.coming-soon-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: clamp(1.5rem, 4vh, 2.5rem);
+  width: 100%;
+  min-width: 0;
+  padding: var(--page-pad-y)
+    max(var(--page-pad-x), env(safe-area-inset-right, 0px))
+    var(--page-pad-y)
+    max(var(--page-pad-x), env(safe-area-inset-left, 0px));
+}
+
+.coming-soon-main {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(1.25rem, 3.5vh, 2.5rem);
+  width: 100%;
+  min-width: 0;
+  max-width: 52rem;
+  margin-inline: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.coming-soon-main .text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.coming-soon-main .cta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+.coming-soon-title {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  padding-inline: 0;
+  font-size: clamp(0.95rem, 2.2vw + 0.45rem, 1.85rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: clamp(0.02em, 0.35vw, 0.08em);
+  overflow-wrap: normal;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: var(--text-shadow);
+}
+
+.coming-soon-title-line {
+  display: block;
+}
+
+.coming-soon-description {
+  margin: 0 0 1rem;
+  width: max-content;
+  max-width: 100%;
+  padding-inline: 0;
+  font-size: clamp(0.75rem, 1.6vw + 0.45rem, 0.9rem);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: clamp(0.06em, 0.7vw, 0.14em);
+  overflow-wrap: break-word;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: var(--text-shadow);
+}
+
+.coming-soon-description-line {
+  display: inline;
+}
+
+.coming-soon-reserve-highlight {
+  position: relative;
+  display: inline-block;
+  font-weight: 500;
+  color: #ffffff;
+  background-image: linear-gradient(var(--brand-orange), var(--brand-orange));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 2px;
+  padding-bottom: 0.12em;
+}
+
+.coming-soon-form-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 0.3rem;
+  /* Match CTA width (sized by description) without expanding it */
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
+  padding-inline: 0;
+}
+
+.coming-soon-copyright {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: var(--text-shadow);
+}
+
+.coming-soon-copyright-logo-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  transition: opacity 0.2s ease;
+}
+
+.coming-soon-copyright-logo-link:hover {
+  opacity: 0.85;
+}
+
+.coming-soon-copyright-logo {
+  display: block;
+  width: auto;
+  height: clamp(1.2rem, 3.2vw, 1.95rem);
+  object-fit: contain;
+}
+
+/* —— Brand logo —— */
+
+.brand-logo-link {
+  display: inline-block;
+  line-height: 0;
+}
+
+.brand-logo-image {
+  display: block;
+  width: var(--logo-size);
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: 152 / 82;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.45));
+}
+
+/* —— Email interest form —— */
+
+.email-interest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.email-interest-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.email-interest-form-field {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 0.375rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  background: rgba(6, 14, 26, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color 0.2s ease;
+}
+
+.email-interest-form-field:focus-within {
+  border-color: var(--brand-orange);
+}
+
+.email-interest-form-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  color: #ffffff;
+  caret-color: #ffffff;
+  outline: none;
+}
+
+.email-interest-form-input::placeholder {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.email-interest-form-input:-webkit-autofill,
+.email-interest-form-input:-webkit-autofill:hover,
+.email-interest-form-input:-webkit-autofill:focus,
+.email-interest-form-input:-webkit-autofill:active,
+.email-interest-form-input:autofill,
+.email-interest-form-input:autofill:hover,
+.email-interest-form-input:autofill:focus,
+.email-interest-form-input:autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  caret-color: #ffffff;
+  border: 0 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  /* Hides Chrome's autofill fill by clipping it to the text glyphs */
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  transition: background-color 99999s ease-in-out 0s;
+}
+
+.email-interest-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  width: 100%;
+  min-width: 0;
+  margin-top: 0.15rem;
+}
+
+.email-interest-form-submit {
+  flex-shrink: 0;
+  min-width: 6.5rem;
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--brand-orange);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.email-interest-form-submit:hover {
+  background: var(--brand-orange-hover);
+}
+
+.email-interest-form-submit:active {
+  transform: scale(0.98);
+}
+
+.email-interest-form-submit:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+/* —— Form toast (bottom-right) —— */
+
+.form-toast {
+  position: fixed;
+  inset: auto 1rem 1rem auto;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  top: auto;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: min(22rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  box-shadow: 0 12px 32px rgba(6, 14, 26, 0.35);
+  pointer-events: auto;
+}
+
+.form-toast--success {
+  background: #ffffff;
+  border-color: #56ba78;
+  color: #1b7a3d;
+  box-shadow: 0 12px 32px rgba(6, 14, 26, 0.18);
+}
+
+.form-toast--error {
+  background: #ffffff;
+  border-color: #e07070;
+  color: #d32f2f;
+  box-shadow: 0 12px 32px rgba(6, 14, 26, 0.18);
+}
+
+.form-toast-message {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.form-toast-dismiss {
+  flex-shrink: 0;
+  margin: -0.2rem -0.25rem 0 0;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.form-toast-dismiss:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* —— Social media links —— */
+
+.social-media-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: clamp(0.85rem, 3vw, 1.25rem);
+}
+
+.social-media-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.45));
+  transition: transform 0.2s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.social-media-icon {
+  display: block;
+  width: clamp(20px, 5vw, 22px);
+  height: clamp(20px, 5vw, 22px);
+}
+
+/* —— Product gallery —— */
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline: 0;
+}
+
+.gallery-stage {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  /* Matches sneak screenshot proportions (~16:9) so slides fill the same box */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: transparent;
+  line-height: 0;
+}
+
+.gallery-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.gallery-operators {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.gallery-operators-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.55rem, 1.8vw, 0.9rem);
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: clamp(0.45rem, 1.5vw, 0.75rem);
+  list-style: none;
+  box-sizing: border-box;
+}
+
+.gallery-operator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(0.45rem, 1.4vw, 0.7rem);
+  border-radius: 10px;
+  background: rgb(255, 255, 255);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.gallery-operator-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 3.25rem;
+  object-fit: contain;
+  object-position: center;
+}
+
+.gallery-operator-logo--solferias {
+  max-height: 4.1rem;
+  transform: scale(1.18);
+}
+
+.gallery-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-top: 1rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.gallery-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.4em;
+  margin: 0;
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: var(--text-shadow);
+}
+
+.gallery-title-text {
+  white-space: pre-wrap;
+}
+
+.gallery-title-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 1em;
+  margin-left: 0.12em;
+  background: var(--brand-orange);
+  border-radius: 1px;
+  transform: translateY(0.05em);
+}
+
+/* —— Breakpoints —— */
+
+@media (max-width: 429px) {
+  .email-interest-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .email-interest-form-submit {
+    order: -1;
+    width: 100%;
+  }
+
+  .email-interest-form-actions .social-media-nav {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (min-width: 480px) {
+  .email-interest-form-field {
+    padding-inline: 1.1rem;
+  }
+
+  .email-interest-form-input {
+    font-size: 0.95rem;
+  }
+
+  .email-interest-form-submit {
+    padding: 0 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 560px) {
+  .email-interest-form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 640px) {
+  .coming-soon-description {
+    letter-spacing: 0.16em;
+  }
+
+  .coming-soon-title {
+    margin-bottom: 0;
+    letter-spacing: 0.06em;
+  }
+
+  .email-interest-form-field {
+    padding-inline: 1.25rem;
+  }
+
+  .email-interest-form-input,
+  .email-interest-form-submit {
+    height: 2.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .coming-soon-body {
+    justify-content: center;
+  }
+
+  .coming-soon-main {
+    gap: 2.5rem;
+  }
+}
+
+/* —— ≤1200px: stacked, centered, organized —— */
+@media (max-width: 1200px) {
+  .coming-soon-header {
+    justify-content: center;
+    padding-bottom: clamp(1.1rem, 3.5vh, 2.25rem);
+  }
+
+  .coming-soon-body {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: clamp(2.25rem, 6.5vh, 3.75rem);
+  }
+
+  .coming-soon-main {
+    align-items: center;
+    width: 100%;
+    max-width: min(50rem, 100%);
+    margin-inline: auto;
+    text-align: center;
+    gap: clamp(1.35rem, 3.8vh, 2.15rem);
+  }
+
+  .coming-soon-main .text,
+  .coming-soon-main .cta {
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .coming-soon-main .cta {
+    margin-inline: auto;
+  }
+
+  .coming-soon-title,
+  .coming-soon-description {
+    text-align: center;
+  }
+
+  .coming-soon-title {
+    font-size: clamp(1.35rem, 3.2vw + 0.55rem, 2rem);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  .coming-soon-title-line {
+    white-space: normal;
+  }
+
+  .coming-soon-description {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .coming-soon-form-section {
+    align-items: stretch;
+    width: 0;
+    min-width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .email-interest-form-actions {
+    justify-content: space-between;
+  }
+
+  .email-interest-form-actions .social-media-nav {
+    justify-content: center;
+  }
+
+  .gallery {
+    width: 100%;
+    max-width: min(46rem, 100%);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .coming-soon-main {
+    max-width: min(36rem, 100%);
+    gap: clamp(1.25rem, 3.5vh, 1.85rem);
+  }
+
+  .coming-soon-body {
+    gap: clamp(2rem, 6vh, 3.25rem);
+  }
+
+  .gallery {
+    max-width: min(40rem, 100%);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .coming-soon-header {
+    padding-bottom: clamp(1.35rem, 4vh, 2.5rem);
+  }
+
+  .coming-soon-body {
+    gap: clamp(2.5rem, 7vh, 3.75rem);
+  }
+
+  .coming-soon-main {
+    max-width: 100%;
+    gap: clamp(1.35rem, 4vh, 2rem);
+  }
+
+  .coming-soon-main .cta {
+    width: 100%;
+  }
+
+  .coming-soon-description {
+    width: 100%;
+    max-width: 100%;
+    letter-spacing: 0.08em;
+  }
+
+  .coming-soon-description-line {
+    display: block;
+  }
+
+  .coming-soon-form-section {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .gallery {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  .coming-soon-main {
+    gap: clamp(1.35rem, 4.5vh, 1.85rem);
+  }
+
+  .coming-soon-title {
+    font-size: clamp(1.2rem, 5.2vw, 1.55rem);
+    letter-spacing: 0.03em;
+  }
+
+  .coming-soon-description {
+    font-size: clamp(0.78rem, 3.2vw, 0.9rem);
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+  }
+}
+
+/* Desktop row layout — unchanged above 1200px */
+@media (min-width: 1201px) {
+  .coming-soon-body {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .coming-soon-main {
+    flex: 1 1 0;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .gallery {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+/* Desktop title sizing between 1201–1300 (unchanged above 1200px) */
+@media (min-width: 1201px) and (max-width: 1300px) {
+  .coming-soon-title {
+    font-size: clamp(1.25rem, 1.5vw + 0.55rem, 1.55rem);
+  }
+}
+
+
+@media (max-height: 640px) and (orientation: landscape) {
+  .coming-soon-header,
+  .coming-soon-footer {
+    min-height: 0;
+  }
+
+  .coming-soon-body {
+    padding-block: 0.75rem;
+    justify-content: flex-start;
+  }
+
+  .coming-soon-main {
+    gap: 1rem;
+    justify-content: flex-start;
+  }
+
+  .coming-soon-title {
+    font-size: clamp(1rem, 3.5vw, 1.35rem);
+  }
+
+  .brand-logo-image {
+    width: 4.5rem;
+    height: auto;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .coming-soon-body {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .coming-soon-main,
+  .gallery {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coming-soon-reserve-highlight {
+    background-size: 100% 2px;
+  }
+}
