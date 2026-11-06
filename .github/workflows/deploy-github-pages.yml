@@ -1,3 +1,4 @@
+
 name: Deploy GitHub Pages
 
 on:
@@ -28,7 +29,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Resolve base path
         id: base
@@ -43,21 +44,23 @@ jobs:
           fi
 
       - name: Install dependencies
+        working-directory: frontend
         run: npm ci
 
       - name: Build static site
+        working-directory: frontend
         run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.base.outputs.path }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
       - name: Ensure .nojekyll
-        run: touch out/.nojekyll
+        run: touch frontend/out/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: out
+          path: frontend/out
 
   deploy:
     needs: build
