@@ -1,0 +1,548 @@
+/* Condensed «Resumo da viagem» print — tokens aligned with motor + sneak palette */
+
+.root {
+  --op-primary: #007c8b;
+  --op-secondary: #e37900;
+  --op-navy: #1a3a63;
+  --op-ink: #1f2933;
+  --op-gray-100: #f3f4f6;
+  --op-gray-200: #e5e7eb;
+  --op-gray-400: #9ca3af;
+  --op-gray-500: #6b7280;
+  --op-page: #f3f4f6;
+  --op-card: #ffffff;
+  --op-radius: 0.75rem;
+  --op-radius-sm: 0.5rem;
+  --op-gold: #f2b400;
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  color: var(--op-ink);
+  font-family: var(--font-sans);
+  line-height: 1.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scaleHost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 960px;
+  height: 540px;
+  flex-shrink: 0;
+  background: transparent;
+  transform-origin: center center;
+}
+
+/* —— Body / timeline —— */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.7rem 1.05rem 0.35rem;
+}
+
+.timeline {
+  --marker-size: 1.7rem;
+  --marker-gap: 0.65rem;
+  --stop-gap: 0.55rem;
+
+  margin: 0;
+  padding: 0 0 0 calc(var(--marker-size) + var(--marker-gap));
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.stopFlights {
+  flex: 0.16 0 auto;
+}
+
+.stopHotel {
+  flex: 1.05 1 0;
+}
+
+.stopExtras {
+  flex: 1 1 0;
+}
+
+.stop:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(
+    -1 * (var(--marker-size) + var(--marker-gap)) + (var(--marker-size) / 2) -
+      1.5px
+  );
+  /* Start under the marker; equal header margins keep tags centered between cards */
+  top: calc(var(--stop-gap) + var(--marker-size));
+  bottom: calc(-1 * var(--stop-gap));
+  width: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--op-primary) 28%, var(--op-gray-200));
+}
+
+.stopFlights:not(:last-child)::after {
+  top: var(--marker-size);
+}
+
+.marker {
+  position: absolute;
+  left: calc(-1 * (var(--marker-size) + var(--marker-gap)));
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--marker-size);
+  height: var(--marker-size);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--op-primary);
+  color: #fff;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 18%);
+  z-index: 1;
+}
+
+.stopHeader {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.55rem;
+  min-height: var(--marker-size);
+  margin-top: var(--stop-gap);
+  margin-bottom: var(--stop-gap);
+  flex-shrink: 0;
+}
+
+.stopFlights .stopHeader {
+  margin-top: 0;
+}
+
+.stopTitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* —— Flight tickets —— */
+
+.flightsStack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.ticketWrap {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.ticket {
+  --notch: 9px;
+  --perf-from-bottom: 1.65rem;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  border-radius: var(--op-radius-sm);
+  background: transparent;
+  overflow: hidden;
+  /* Soft-edged cutouts → true transparency (no black fill discs) */
+  -webkit-mask-image:
+    radial-gradient(
+      circle at 0 calc(100% - var(--perf-from-bottom)),
+      #0000 calc(var(--notch) - 0.6px),
+      #000 calc(var(--notch) + 0.6px)
+    ),
+    radial-gradient(
+      circle at 100% calc(100% - var(--perf-from-bottom)),
+      #0000 calc(var(--notch) - 0.6px),
+      #000 calc(var(--notch) + 0.6px)
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(
+      circle at 0 calc(100% - var(--perf-from-bottom)),
+      #0000 calc(var(--notch) - 0.6px),
+      #000 calc(var(--notch) + 0.6px)
+    ),
+    radial-gradient(
+      circle at 100% calc(100% - var(--perf-from-bottom)),
+      #0000 calc(var(--notch) - 0.6px),
+      #000 calc(var(--notch) + 0.6px)
+    );
+  mask-composite: intersect;
+}
+
+.ticketTop {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: none;
+  border-top-left-radius: var(--op-radius-sm);
+  border-top-right-radius: var(--op-radius-sm);
+  padding: 0.48rem 0.55rem 0.55rem;
+  min-height: 0;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 8%);
+}
+
+.ticketRoute {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  gap: 0.35rem 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.airline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.airlineLogo {
+  display: block;
+  width: 2.2rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
+.routeMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.25rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.endpoint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.endpointArrival {
+  text-align: right;
+}
+
+.endpointTime {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--op-navy);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.endpointCode {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--op-primary);
+}
+
+.routeMid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 3.2rem;
+}
+
+.duration {
+  position: relative;
+  z-index: 1;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--op-gray-500);
+}
+
+.routeLine {
+  position: relative;
+  width: 100%;
+  height: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.routeLine::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--op-primary) 35%, var(--op-gray-200));
+}
+
+.routePlane {
+  position: relative;
+  z-index: 1;
+  width: 0.85rem;
+  height: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--op-primary);
+  font-size: 0.52rem;
+  flex-shrink: 0;
+}
+
+.ticketBottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: var(--perf-from-bottom);
+  padding: 0.34rem 0.55rem 0.32rem;
+  background: var(--op-secondary);
+  color: #fff;
+  border: none;
+  border-bottom-left-radius: var(--op-radius-sm);
+  border-bottom-right-radius: var(--op-radius-sm);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.14rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, white 38%, transparent);
+  font-size: 0.55rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.pill svg {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+/* —— Hotel card —— */
+
+.hotelCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border-radius: var(--op-radius);
+  border: 1px solid var(--op-gray-200);
+  background: var(--op-card);
+  box-shadow: 0 2px 10px rgb(15 23 42 / 4%);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.hotelMedia {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  align-self: stretch;
+  overflow: hidden;
+  background: var(--op-gray-100);
+  border-radius: 0;
+}
+
+.hotelImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.hotelInfo {
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 0;
+  padding: 0.45rem 0.65rem 0.45rem 0.6rem;
+  overflow: hidden;
+}
+
+.hotelTitleBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.hotelName {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--op-navy);
+  line-height: 1.25;
+}
+
+.stars {
+  color: var(--op-gold);
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.facts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem 0.55rem;
+  min-width: 0;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+  min-width: 0;
+}
+
+.factHead {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--op-gray-500);
+}
+
+.factIcon {
+  width: 0.6rem;
+  height: 0.6rem;
+  color: var(--op-primary);
+  flex-shrink: 0;
+}
+
+.factValue {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--op-navy);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* —— Extras —— */
+
+.extrasList {
+  margin: 0;
+  padding: 0.4rem 0.65rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  border-radius: var(--op-radius);
+  border: 1px solid var(--op-gray-200);
+  background: var(--op-card);
+  box-shadow: 0 2px 10px rgb(15 23 42 / 4%);
+  overflow: hidden;
+}
+
+.extraRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.extraName {
+  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--op-navy);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.extraPrice {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--op-navy);
+}
+
+.extraIncluded {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--op-primary);
+}
+

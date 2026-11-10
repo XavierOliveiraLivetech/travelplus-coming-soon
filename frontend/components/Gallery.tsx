@@ -1,22 +1,15 @@
 "use client";
 
-import { withBasePath } from "@/lib/basePath";
 import {
   fadeUp,
   gallerySlide,
-  operatorGrid,
-  operatorPop,
 } from "@/lib/motion";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
-
-type GalleryImageItem = {
-  id: string;
-  kind: "image";
-  title: string;
-  src: string;
-  alt: string;
-};
+import { useCallback, useEffect, useRef, useState } from "react";
+import OperadoresPrint from "./OperadoresPrint";
+import OrcamentoVideo from "./OrcamentoVideo";
+import PesquisaAgrupadaVideo from "./PesquisaAgrupadaVideo";
+import PropostaPdfPrint from "./PropostaPdfPrint";
 
 type GalleryOperatorsItem = {
   id: string;
@@ -24,26 +17,35 @@ type GalleryOperatorsItem = {
   title: string;
 };
 
-type GalleryItem = GalleryImageItem | GalleryOperatorsItem;
+type GalleryPesquisaItem = {
+  id: string;
+  kind: "pesquisa";
+  title: string;
+};
 
-const OPERATOR_LOGOS = [
-    { id: "newblue", src: withBasePath("/Logos/Operadores/newblue.png"), alt: "Newblue" },
-    { id: "nortravel", src: withBasePath("/Logos/Operadores/nortravel.png"), alt: "Nortravel" },
-    { id: "solferias", src: withBasePath("/Logos/Operadores/solferias.svg"), alt: "Sol Férias" },
-    { id: "soltropico", src: withBasePath("/Logos/Operadores/Soltropico.png"), alt: "Soltrópico" },
-    { id: "viajartours", src: withBasePath("/Logos/Operadores/viajartours.png"), alt: "Viajar Tours" },
-  { id: "soltour", src: withBasePath("/Logos/Operadores/soltour.png"), alt: "Soltour" },
-  { id: "travelplan", src: withBasePath("/Logos/Operadores/travelplan.png"), alt: "Travelplan" },
-  { id: "tui", src: withBasePath("/Logos/Operadores/tui.png"), alt: "TUI" },
-] as const;
+type GalleryOrcamentoItem = {
+  id: string;
+  kind: "orcamento";
+  title: string;
+};
+
+type GalleryPdfItem = {
+  id: string;
+  kind: "pdf";
+  title: string;
+};
+
+type GalleryItem =
+  | GalleryOperatorsItem
+  | GalleryPesquisaItem
+  | GalleryOrcamentoItem
+  | GalleryPdfItem;
 
 const ITEMS: GalleryItem[] = [
   {
     id: "pesquisa",
-    kind: "image",
+    kind: "pesquisa",
     title: "Pesquisa agrupada",
-    src: withBasePath("/Img/sneaks/pesquisa.png"),
-    alt: "Pré-visualização da pesquisa agrupada",
   },
   {
     id: "operadores",
@@ -52,22 +54,27 @@ const ITEMS: GalleryItem[] = [
   },
   {
     id: "proposta",
-    kind: "image",
-    title: "Orçamento prontos em 3 minutos",
-    src: withBasePath("/Img/sneaks/orcamento.png"),
-    alt: "Pré-visualização do orçamento rápido",
+    kind: "orcamento",
+    title: "Orçamento pronto em 3 minutos",
   },
   {
     id: "pdf",
-    kind: "image",
+    kind: "pdf",
     title: "Proposta em PDF",
-    src: withBasePath("/Img/sneaks/pdf.png"),
-    alt: "Pré-visualização da proposta em PDF",
   },
 ];
 
-const AUTO_ADVANCE_MS = 7500;
-const OPERATORS_ADVANCE_MS = 11000;
+/** Dwell time for static slides (not pesquisa video / PDF scroll). */
+const GALLERY_SLIDE_MS = 5_000;
+
+/** Wait after pesquisa video or PDF pan finishes before auto-advance. */
+const GALLERY_POST_SHOWCASE_MS = 1_000;
+
+function isShowcaseSyncedSlide(item: GalleryItem) {
+  return (
+    item.kind === "pesquisa" || item.kind === "orcamento" || item.kind === "pdf"
+  );
+}
 const TYPE_MS = 42;
 const ERASE_MS = 28;
 const HOLD_MS = 180;
@@ -152,37 +159,10 @@ function TypewriterCaption({ text }: { text: string }) {
   );
 }
 
-function OperatorsSlide() {
-  return (
-    <motion.ul
-      className="gallery-operators-grid"
-      variants={operatorGrid}
-      initial="hidden"
-      animate="show"
-    >
-      {OPERATOR_LOGOS.map((logo) => (
-        <motion.li
-          key={logo.id}
-          className="gallery-operator"
-          variants={operatorPop}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logo.src}
-            alt={logo.alt}
-            className={`gallery-operator-logo${logo.id === "solferias" ? " gallery-operator-logo--solferias" : ""}`}
-            loading="lazy"
-            decoding="async"
-          />
-        </motion.li>
-      ))}
-    </motion.ul>
-  );
-}
-
 export default function Gallery() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const showcaseAdvanceTimerRef = useRef<number | null>(null);
   const active = ITEMS[activeIndex];
 
   const goTo = (nextIndex: number, nextDirection: number) => {
@@ -194,6 +174,25 @@ export default function Gallery() {
     goTo(activeIndex + step, step);
   };
 
+  const handleShowcaseFinished = useCallback(() => {
+    if (showcaseAdvanceTimerRef.current !== null) {
+      window.clearTimeout(showcaseAdvanceTimerRef.current);
+    }
+
+    showcaseAdvanceTimerRef.current = window.setTimeout(() => {
+      showcaseAdvanceTimerRef.current = null;
+      paginate(1);
+    }, GALLERY_POST_SHOWCASE_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- paginate keyed on activeIndex only
+  }, [activeIndex]);
+
+  useEffect(() => {
+    if (showcaseAdvanceTimerRef.current !== null) {
+      window.clearTimeout(showcaseAdvanceTimerRef.current);
+      showcaseAdvanceTimerRef.current = null;
+    }
+  }, [activeIndex]);
+
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -203,14 +202,14 @@ export default function Gallery() {
       return;
     }
 
-    const delay =
-      ITEMS[activeIndex]?.kind === "operators"
-        ? OPERATORS_ADVANCE_MS
-        : AUTO_ADVANCE_MS;
+    const item = ITEMS[activeIndex];
+    if (isShowcaseSyncedSlide(item)) {
+      return;
+    }
 
     const timer = window.setTimeout(() => {
       paginate(1);
-    }, delay);
+    }, GALLERY_SLIDE_MS);
 
     return () => window.clearTimeout(timer);
     // Intentionally keyed only on activeIndex so auto-advance resets on every slide change.
@@ -252,18 +251,24 @@ export default function Gallery() {
           >
             {active.kind === "operators" ? (
               <div className="gallery-operators">
-                <OperatorsSlide />
+                <OperadoresPrint />
+              </div>
+            ) : active.kind === "pesquisa" ? (
+              <div className="gallery-pesquisa">
+                <PesquisaAgrupadaVideo
+                  onShowcaseFinished={handleShowcaseFinished}
+                />
+              </div>
+            ) : active.kind === "orcamento" ? (
+              <div className="gallery-orcamento">
+                <OrcamentoVideo onShowcaseFinished={handleShowcaseFinished} />
               </div>
             ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={active.src}
-                alt={active.alt}
-                className="gallery-image"
-                loading="eager"
-                decoding="async"
-                draggable={false}
-              />
+              <div className="gallery-pdf">
+                <PropostaPdfPrint
+                  onShowcaseFinished={handleShowcaseFinished}
+                />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
