@@ -1,16 +1,14 @@
 "use client";
 
 import { withBasePath } from "@/lib/basePath";
+import { useGalleryStageScale } from "@/lib/galleryStage";
 import type { PDFPageProxy } from "pdfjs-dist";
 import type { PageViewport } from "pdfjs-dist";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import styles from "./PropostaPdfPrint.module.css";
 
-const PDF_URL = withBasePath("/Img/sneaks/pdf.pdf");
+const PDF_URL = withBasePath("/sneaks/pdf.pdf");
 const WORKER_URL = withBasePath("/pdf.worker.min.mjs");
-
-const DESIGN_W = 960;
-const DESIGN_H = 540;
 
 /** First-page band (logo + meta) kept out of the viewport; tuned to pdf.pdf. */
 const HEADER_SKIP_RATIO = 0.14;
@@ -339,7 +337,7 @@ async function measureTotalSectionBottomLayoutPx(
       continue;
     }
 
-    const [vx, vy] = viewport.convertToViewportPoint(
+    const [, vy] = viewport.convertToViewportPoint(
       raw.transform[4],
       raw.transform[5],
     );
@@ -415,34 +413,11 @@ export default function PropostaPdfPrint({
   const cardRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const onShowcaseFinishedRef = useRef(onShowcaseFinished);
-  const [scale, setScale] = useState(1);
+  const scale = useGalleryStageScale(hostRef);
 
   useEffect(() => {
     onShowcaseFinishedRef.current = onShowcaseFinished;
   }, [onShowcaseFinished]);
-
-  useLayoutEffect(() => {
-    const host = hostRef.current;
-    if (!host) {
-      return;
-    }
-
-    const update = () => {
-      const { width, height } = host.getBoundingClientRect();
-      if (width <= 0 || height <= 0) {
-        return;
-      }
-      const next = Math.min(width / DESIGN_W, height / DESIGN_H);
-      setScale((current) =>
-        Math.abs(current - next) < 0.01 ? current : next,
-      );
-    };
-
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(host);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const card = cardRef.current;

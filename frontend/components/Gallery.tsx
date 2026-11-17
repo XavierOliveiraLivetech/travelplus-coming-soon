@@ -6,40 +6,19 @@ import {
 } from "@/lib/motion";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ORCAMENTO_VIDEO_SRC,
+  PESQUISA_AGRUPADA_VIDEO_SRC,
+} from "@/lib/galleryVideos";
+import GalleryShowcaseVideo from "./GalleryShowcaseVideo";
 import OperadoresPrint from "./OperadoresPrint";
-import OrcamentoVideo from "./OrcamentoVideo";
-import PesquisaAgrupadaVideo from "./PesquisaAgrupadaVideo";
 import PropostaPdfPrint from "./PropostaPdfPrint";
 
-type GalleryOperatorsItem = {
+type GalleryItem = {
   id: string;
-  kind: "operators";
+  kind: "operators" | "pesquisa" | "orcamento" | "pdf";
   title: string;
 };
-
-type GalleryPesquisaItem = {
-  id: string;
-  kind: "pesquisa";
-  title: string;
-};
-
-type GalleryOrcamentoItem = {
-  id: string;
-  kind: "orcamento";
-  title: string;
-};
-
-type GalleryPdfItem = {
-  id: string;
-  kind: "pdf";
-  title: string;
-};
-
-type GalleryItem =
-  | GalleryOperatorsItem
-  | GalleryPesquisaItem
-  | GalleryOrcamentoItem
-  | GalleryPdfItem;
 
 const ITEMS: GalleryItem[] = [
   {
@@ -222,57 +201,74 @@ export default function Gallery() {
       aria-label="Galeria de pré-visualizações"
       variants={fadeUp}
     >
-      <figure className="gallery-stage">
-        <AnimatePresence initial={false} custom={direction}>
-          <motion.div
-            key={active.id}
-            className="gallery-slide"
-            custom={direction}
-            variants={gallerySlide}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
-            onDragEnd={(_, info) => {
-              const { offset, velocity } = info;
-              const swipedNext =
-                offset.x < -SWIPE_OFFSET_PX || velocity.x < -SWIPE_VELOCITY;
-              const swipedPrev =
-                offset.x > SWIPE_OFFSET_PX || velocity.x > SWIPE_VELOCITY;
+      <div className="gallery-window">
+        <div className="gallery-window-chrome" aria-hidden="true">
+          <div className="gallery-window-traffic">
+            <span className="gallery-window-dot gallery-window-dot--close" />
+            <span className="gallery-window-dot gallery-window-dot--minimize" />
+            <span className="gallery-window-dot gallery-window-dot--maximize" />
+          </div>
+        </div>
 
-              if (swipedNext) {
-                paginate(1);
-              } else if (swipedPrev) {
-                paginate(-1);
-              }
-            }}
-          >
-            {active.kind === "operators" ? (
-              <div className="gallery-operators">
-                <OperadoresPrint />
-              </div>
-            ) : active.kind === "pesquisa" ? (
-              <div className="gallery-pesquisa">
-                <PesquisaAgrupadaVideo
-                  onShowcaseFinished={handleShowcaseFinished}
-                />
-              </div>
-            ) : active.kind === "orcamento" ? (
-              <div className="gallery-orcamento">
-                <OrcamentoVideo onShowcaseFinished={handleShowcaseFinished} />
-              </div>
-            ) : (
-              <div className="gallery-pdf">
-                <PropostaPdfPrint
-                  onShowcaseFinished={handleShowcaseFinished}
-                />
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </figure>
+        <figure className="gallery-stage">
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={active.id}
+              className="gallery-slide"
+              custom={direction}
+              variants={gallerySlide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              onDragEnd={(_, info) => {
+                const { offset, velocity } = info;
+                const swipedNext =
+                  offset.x < -SWIPE_OFFSET_PX || velocity.x < -SWIPE_VELOCITY;
+                const swipedPrev =
+                  offset.x > SWIPE_OFFSET_PX || velocity.x > SWIPE_VELOCITY;
+
+                if (swipedNext) {
+                  paginate(1);
+                } else if (swipedPrev) {
+                  paginate(-1);
+                }
+              }}
+            >
+              {active.kind === "operators" ? (
+                <div className="gallery-operators">
+                  <OperadoresPrint />
+                </div>
+              ) : active.kind === "pesquisa" ? (
+                <div className="gallery-pesquisa">
+                  <GalleryShowcaseVideo
+                    src={PESQUISA_AGRUPADA_VIDEO_SRC}
+                    ariaLabel="Gravação: pesquisa agrupada no Livetrip — Hilton Cabo Verde, regime só alojamento e quartos"
+                    onShowcaseFinished={handleShowcaseFinished}
+                  />
+                </div>
+              ) : active.kind === "orcamento" ? (
+                <div className="gallery-orcamento">
+                  <GalleryShowcaseVideo
+                    src={ORCAMENTO_VIDEO_SRC}
+                    ariaLabel="Gravação: criar orçamento no Livetrip em poucos minutos"
+                    crop="centered"
+                    onShowcaseFinished={handleShowcaseFinished}
+                  />
+                </div>
+              ) : (
+                <div className="gallery-pdf">
+                  <PropostaPdfPrint
+                    onShowcaseFinished={handleShowcaseFinished}
+                  />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </figure>
+      </div>
 
       <div className="gallery-meta">
         <TypewriterCaption text={active.title} />

@@ -1,81 +1,58 @@
 "use client";
 
 import { withBasePath } from "@/lib/basePath";
+import { useGalleryStageScale } from "@/lib/galleryStage";
 import { operatorGrid, operatorPop } from "@/lib/motion";
 import { motion } from "motion/react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import styles from "./OperadoresPrint.module.css";
-
-/** Same design canvas as OrcamentoPrint — fills the 16:9 gallery stage */
-const DESIGN_W = 960;
-const DESIGN_H = 540;
 
 const OPERATORS = [
   {
     id: "newblue",
     name: "Newblue",
-    logo: withBasePath("/Logos/Operadores/newblue.png"),
+    logo: withBasePath("/sneaks/Operadores/newblue.png"),
   },
   {
     id: "nortravel",
     name: "Nortravel",
-    logo: withBasePath("/Logos/Operadores/nortravel.png"),
+    logo: withBasePath("/sneaks/Operadores/nortravel.png"),
   },
   {
     id: "solferias",
     name: "Sol Férias",
-    logo: withBasePath("/Logos/Operadores/solferias.svg"),
+    logo: withBasePath("/sneaks/Operadores/solferias.svg"),
   },
   {
     id: "soltropico",
     name: "Soltrópico",
-    logo: withBasePath("/Logos/Operadores/Soltropico.png"),
+    logo: withBasePath("/sneaks/Operadores/Soltropico.png"),
   },
   {
     id: "viajartours",
     name: "Viajar Tours",
-    logo: withBasePath("/Logos/Operadores/viajartours.png"),
+    logo: withBasePath("/sneaks/Operadores/viajartours.png"),
   },
   {
     id: "soltour",
     name: "Soltour",
-    logo: withBasePath("/Logos/Operadores/soltour.png"),
+    logo: withBasePath("/sneaks/Operadores/soltour.png"),
   },
   {
     id: "travelplan",
     name: "Travelplan",
-    logo: withBasePath("/Logos/Operadores/travelplan.png"),
+    logo: withBasePath("/sneaks/Operadores/travelplan.png"),
   },
   {
     id: "tui",
     name: "TUI",
-    logo: withBasePath("/Logos/Operadores/tui.png"),
+    logo: withBasePath("/sneaks/Operadores/tui.png"),
   },
 ] as const;
 
 export default function OperadoresPrint() {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    const host = hostRef.current;
-    if (!host) {
-      return;
-    }
-
-    const update = () => {
-      const { width, height } = host.getBoundingClientRect();
-      if (width <= 0 || height <= 0) {
-        return;
-      }
-      setScale(Math.min(width / DESIGN_W, height / DESIGN_H));
-    };
-
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(host);
-    return () => observer.disconnect();
-  }, []);
+  const scale = useGalleryStageScale(hostRef);
 
   return (
     <div

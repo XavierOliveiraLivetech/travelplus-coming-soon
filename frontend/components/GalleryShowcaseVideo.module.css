@@ -1,4 +1,4 @@
-/* Pesquisa agrupada — screen recording in the shared 960×540 gallery stage. */
+/* Gallery screen recordings in the shared 960×540 stage. */
 
 .root {
   position: relative;
@@ -62,4 +62,13 @@
   object-fit: cover;
   object-position: left top;
   pointer-events: none;
+}
+
+.videoCentered {
+  /* Overscan + pin to bottom so recording edge artifacts are clipped */
+  width: 100%;
+  height: calc(100% + 10px);
+  top: 0;
+  object-fit: cover;
+  object-position: center bottom;
 }

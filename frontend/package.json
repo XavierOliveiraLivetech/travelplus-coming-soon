@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "npx --yes serve out",
     "lint": "eslint",
-    "record:pesquisa-hilton": "node scripts/record-pesquisa-hilton.mjs"
+    "record:pesquisa-hilton": "node scripts/record-pesquisa-hilton.mjs",
+    "remux:sneaks": "node scripts/remux-sneaks.mjs"
   },
   "dependencies": {
     "motion": "^14.9.1",
