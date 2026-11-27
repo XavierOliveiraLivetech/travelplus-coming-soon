@@ -5,10 +5,10 @@
  *   npm run optimize:images
  *
  * Sizes: the background photo keeps its 1920x1080 resolution (quality 90,
- * PSNR ~40 dB vs the JPEG). Logos are downscaled, keeping their aspect ratio,
- * to 2-4x the largest box they are drawn in (measured at a 3840px viewport) and
- * saved lossless, so they stay sharp on retina screens. The hotel photos stay
- * JPEG: WebP at equal quality saved almost nothing.
+ * PSNR ~40 dB vs the JPEG). Logos are downscaled to 2-4x the largest box they
+ * are drawn in (measured at a 3840px viewport), at the size that best keeps
+ * their exact aspect ratio, and saved lossless, so they stay sharp on retina
+ * screens. The hotel photos stay JPEG: WebP at equal quality saved almost nothing.
  */
 import { statSync } from "node:fs";
 import path from "node:path";
@@ -32,12 +32,30 @@ const IMAGES = [
   ["operators/viajartours.png", 432, "logo"],
 ];
 
+function closestRatioSize(width, height, minWidth) {
+  const ratio = width / height;
+  let best = { width, height, error: Infinity };
+  for (let w = minWidth; w <= Math.min(width, Math.ceil(minWidth * 1.5)); w++) {
+    const h = Math.round(w / ratio);
+    const error = Math.abs(w / h - ratio) / ratio;
+    if (error < best.error) best = { width: w, height: h, error };
+  }
+  return { width: best.width, height: best.height };
+}
+
 for (const [src, maxWidth, mode] of IMAGES) {
   const input = path.join(publicDir, src);
   const output = input.replace(/\.(png|jpe?g)$/i, ".webp");
   let pipeline = sharp(input);
   if (maxWidth) {
-    pipeline = pipeline.resize({ width: maxWidth, withoutEnlargement: true, kernel: "lanczos3" });
+    const { width, height } = await sharp(input).metadata();
+    if (width > maxWidth) {
+      // Logos are drawn with `width: auto` / `object-fit: contain`, so their
+      // aspect ratio decides layout. Pick the size (>= maxWidth) whose rounded
+      // height keeps the original ratio closest, to avoid sub-pixel shifts.
+      const size = closestRatioSize(width, height, maxWidth);
+      pipeline = pipeline.resize({ ...size, fit: "fill", kernel: "lanczos3" });
+    }
   }
   pipeline =
     mode === "photo"
