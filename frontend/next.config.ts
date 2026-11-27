@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  experimental: {
+    // Inline the page CSS in <head> instead of 2 render-blocking <link> requests.
+    inlineCss: true,
+  },
   ...(basePath
     ? {
         basePath,
