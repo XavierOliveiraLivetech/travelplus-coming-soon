@@ -6,54 +6,51 @@ import {
 } from "@/lib/motion";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ORCAMENTO_VIDEO_SRC,
-  PESQUISA_AGRUPADA_VIDEO_SRC,
-} from "@/lib/galleryVideos";
-import GalleryShowcaseVideo from "./GalleryShowcaseVideo";
-import OperadoresPrint from "./OperadoresPrint";
-import PropostaPdfPrint from "./PropostaPdfPrint";
+import type { ComponentType } from "react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { MotionToggle } from "./MotionToggle";
+import type { FlowDemoProps } from "./flow/FlowDemo";
+import { OperadoresFlow } from "./flow/OperadoresFlow";
+import { PesquisaFlow } from "./flow/PesquisaFlow";
+import { PlatformFlow } from "./flow/PlatformFlow";
+import { PropostaFlow } from "./flow/PropostaFlow";
 
 type GalleryItem = {
   id: string;
-  kind: "operators" | "pesquisa" | "orcamento" | "pdf";
   title: string;
+  /** Animated platform demo; the gallery moves on when it finishes a cycle. */
+  Flow: ComponentType<FlowDemoProps>;
 };
 
 const ITEMS: GalleryItem[] = [
   {
     id: "pesquisa",
-    kind: "pesquisa",
+    Flow: PesquisaFlow,
     title: "Pesquisa agrupada",
   },
   {
     id: "operadores",
-    kind: "operators",
+    Flow: OperadoresFlow,
     title: "Operadores integrados",
   },
   {
     id: "proposta",
-    kind: "orcamento",
+    Flow: PlatformFlow,
     title: "Orçamento pronto em 3 minutos",
   },
   {
     id: "pdf",
-    kind: "pdf",
+    Flow: PropostaFlow,
     title: "Proposta em PDF",
   },
 ];
 
-/** Dwell time for static slides (not pesquisa video / PDF scroll). */
-const GALLERY_SLIDE_MS = 5_000;
+/**
+ * Delay between a demo finishing and the next slide. The demo holds its final
+ * frame (it never replays), so the gallery moves on straight away.
+ */
+const GALLERY_POST_SHOWCASE_MS = 0;
 
-/** Wait after pesquisa video or PDF pan finishes before auto-advance. */
-const GALLERY_POST_SHOWCASE_MS = 1_000;
-
-function isShowcaseSyncedSlide(item: GalleryItem) {
-  return (
-    item.kind === "pesquisa" || item.kind === "orcamento" || item.kind === "pdf"
-  );
-}
 const TYPE_MS = 42;
 const ERASE_MS = 28;
 const HOLD_MS = 180;
@@ -140,11 +137,17 @@ function TypewriterCaption({ text }: { text: string }) {
 
 export default function Gallery() {
   const [activeIndex, setActiveIndex] = useState(0);
+  // Pause button at the right of the demo's app bar; applies to the demo on screen.
+  const [paused, setPaused] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
   const [direction, setDirection] = useState(1);
   const showcaseAdvanceTimerRef = useRef<number | null>(null);
   const active = ITEMS[activeIndex];
 
   const goTo = (nextIndex: number, nextDirection: number) => {
+    // A new slide always starts playing (a paused one would hold its first,
+    // still-empty frame).
+    setPaused(false);
     setDirection(nextDirection);
     setActiveIndex(wrapIndex(nextIndex, ITEMS.length));
   };
@@ -172,29 +175,6 @@ export default function Gallery() {
     }
   }, [activeIndex]);
 
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const item = ITEMS[activeIndex];
-    if (isShowcaseSyncedSlide(item)) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      paginate(1);
-    }, GALLERY_SLIDE_MS);
-
-    return () => window.clearTimeout(timer);
-    // Intentionally keyed only on activeIndex so auto-advance resets on every slide change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex]);
-
   return (
     <motion.aside
       className="gallery"
@@ -202,13 +182,6 @@ export default function Gallery() {
       variants={fadeUp}
     >
       <div className="gallery-window">
-        <div className="gallery-window-chrome" aria-hidden="true">
-          <div className="gallery-window-traffic">
-            <span className="gallery-window-dot gallery-window-dot--close" />
-            <span className="gallery-window-dot gallery-window-dot--minimize" />
-            <span className="gallery-window-dot gallery-window-dot--maximize" />
-          </div>
-        </div>
 
         <figure className="gallery-stage">
           <AnimatePresence initial={false} custom={direction}>
@@ -237,34 +210,23 @@ export default function Gallery() {
                 }
               }}
             >
-              {active.kind === "operators" ? (
-                <div className="gallery-operators">
-                  <OperadoresPrint />
-                </div>
-              ) : active.kind === "pesquisa" ? (
-                <div className="gallery-pesquisa">
-                  <GalleryShowcaseVideo
-                    src={PESQUISA_AGRUPADA_VIDEO_SRC}
-                    ariaLabel="Gravação: pesquisa agrupada no Livetrip — Hilton Cabo Verde, regime só alojamento e quartos"
-                    onShowcaseFinished={handleShowcaseFinished}
-                  />
-                </div>
-              ) : active.kind === "orcamento" ? (
-                <div className="gallery-orcamento">
-                  <GalleryShowcaseVideo
-                    src={ORCAMENTO_VIDEO_SRC}
-                    ariaLabel="Gravação: criar orçamento no Livetrip em poucos minutos"
-                    crop="centered"
-                    onShowcaseFinished={handleShowcaseFinished}
-                  />
-                </div>
-              ) : (
-                <div className="gallery-pdf">
-                  <PropostaPdfPrint
-                    onShowcaseFinished={handleShowcaseFinished}
-                  />
-                </div>
-              )}
+              <div className="gallery-flow">
+                <active.Flow
+                  embedded
+                  paused={paused}
+                  onCycleComplete={handleShowcaseFinished}
+                  barAction={
+                    reducedMotion ? undefined : (
+                      <MotionToggle
+                        className="gallery-window-toggle"
+                        paused={paused}
+                        onToggle={() => setPaused((p) => !p)}
+                        label="a demonstração da plataforma"
+                      />
+                    )
+                  }
+                />
+              </div>
             </motion.div>
           </AnimatePresence>
         </figure>

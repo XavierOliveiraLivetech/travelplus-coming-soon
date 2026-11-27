@@ -1,0 +1,1249 @@
+/*
+ * Scenes for the Pesquisa / Operadores / Proposta demos. Same tokens and
+ * visual language as FlowDemo.module.css (the orçamento demo). Animations run
+ * only while the demo plays: FlowDemo sets [data-running] on the card and
+ * [data-active] on the visible scene. Without them (reduced motion) every
+ * element simply shows its final state.
+ */
+
+/* ——— Generic motion helpers ——— */
+
+[data-running] [data-active] .rise {
+  animation: rise 420ms var(--ease-out) var(--at, 0ms) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.45rem) scale(0.98);
+  }
+}
+
+/* Two states in one cell: .before is shown until --done, then .after */
+.swap {
+  display: inline-grid;
+  align-items: center;
+}
+
+.swap > * {
+  grid-area: 1 / 1;
+}
+
+.before {
+  opacity: 0;
+  visibility: hidden;
+}
+
+[data-running] [data-active] .before {
+  animation: swapOut 220ms var(--ease-out) var(--done) both;
+}
+
+[data-running] [data-active] .after {
+  animation: swapIn 320ms var(--ease-out) var(--done) both;
+}
+
+@keyframes swapOut {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes swapIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+.spinner {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid color-mix(in srgb, var(--brand-orange) 25%, transparent);
+  border-top-color: var(--brand-orange);
+  border-radius: 50%;
+}
+
+[data-running] [data-active] .spinner {
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.statusOk {
+  color: var(--success);
+}
+
+.statusOk svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 1.4rem;
+}
+
+.muted {
+  font-size: 0.6875rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Picked row / card: border turns to the selected colour at --pick */
+[data-running] [data-active] .pick {
+  animation:
+    rise 420ms var(--ease-out) var(--at, 0ms) both,
+    pickOn 500ms var(--ease-out) var(--pick) both;
+}
+
+.pick {
+  border-color: var(--ui-selected-line);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-blue) 6%, transparent);
+}
+
+@keyframes pickOn {
+  from {
+    border-color: var(--linha);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ——— Pesquisa agrupada: one page + rooms modal ———
+ * Same building blocks as the orçamento / proposta demos: white boxes with a
+ * thin line, violet icon tiles, display-font prices, soft orange buttons.
+ * Heights are fixed (not width-driven) so the gallery frame doesn't have to
+ * shrink this card more than the other slides.
+ */
+
+/* Hotel + its regimes in one box (as on the platform). The box fills the
+   stage: the hotel row takes the spare height and the photo grows with it.
+   The photo's width is a share of the row, never derived from its height,
+   so text wrapping can't change after the gallery measures the card. */
+.hotelBlock {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.hotelCard {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.photo {
+  position: relative;
+  flex: 0 0 31%;
+  align-self: stretch;
+  min-height: 8.5rem;
+  overflow: hidden;
+  border-radius: var(--ui-radius-box);
+  background: var(--papel);
+}
+
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The second picture slides in like the platform's photo carousel */
+[data-running] [data-active] .photoNext {
+  animation: photoIn 600ms var(--ease-out) var(--done) both;
+}
+
+@keyframes photoIn {
+  from {
+    opacity: 0;
+    transform: translateX(12%);
+  }
+}
+
+.photoNav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.4rem;
+  pointer-events: none;
+}
+
+.photoArrow {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.85);
+  color: var(--brand-blue);
+  box-shadow: 0 2px 6px -2px rgb(20 16 48 / 0.35);
+}
+
+.photoArrow svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.hotelInfo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-top: 0.15rem;
+}
+
+.hotelName {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hotelName b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stars {
+  flex-shrink: 0;
+  color: var(--brand-orange);
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Hotel facilities: light grey tags + "Ver mais" (as on the platform) */
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.amenity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--ui-radius-ctl);
+  background: color-mix(in srgb, var(--brand-blue) 6%, var(--branco));
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.amenity svg {
+  flex-shrink: 0;
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--brand-blue);
+}
+
+.moreLink {
+  padding: 0 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--violet);
+  white-space: nowrap;
+}
+
+/* Cheapest room of each regime: three option cards */
+.regimeRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+/* Same box as the insurance options in the orçamento demo */
+.regime {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.7rem 0.6rem 0.75rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.regimeChip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--brand-blue);
+  white-space: nowrap;
+}
+
+.regimeChip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Violet icon tile, as in the orçamento's "Seguro" / "Extras" headers */
+.regimeIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: var(--ui-radius-ctl);
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.regimeIcon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.regimeRoom {
+  margin-top: 0.1rem;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.regimePrice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.regimePrice b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.regimePrice b small {
+  margin-left: 0.2rem;
+  font-family: var(--font-body, inherit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.regimePrice > span[data-op] {
+  width: 4.5rem;
+  height: 1.6rem;
+}
+
+.regimeActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.regime .btnWide {
+  width: 100%;
+  min-height: 2.1rem;
+  font-size: 0.875rem;
+}
+
+/* Secondary action, same as the insurance "Escolher" button */
+.regimeFoot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 1.9rem;
+  border-radius: var(--ui-radius-ctl);
+  background: color-mix(in srgb, var(--brand-blue) 7%, var(--branco));
+  color: var(--brand-blue);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.regimeFoot svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+[data-running] [data-active] .regimeFootPress {
+  animation: footPress 420ms var(--ease-out) var(--press) both;
+}
+
+@keyframes footPress {
+  35% {
+    transform: scale(0.95);
+    background: var(--orange-soft);
+    color: var(--brand-orange-dark);
+  }
+}
+
+/*
+ * Rooms modal: covers the whole stage (the scene isn't positioned, so the
+ * stage is the containing block). Its final state is "open", so without
+ * motion it simply shows; while running it's hidden until --at.
+ */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  padding: 0.75rem 1rem;
+  background: rgb(20 16 48 / 0.28);
+}
+
+[data-running] [data-active] .backdrop {
+  animation: backdropIn 280ms var(--ease-out) var(--at) both;
+}
+
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.modal {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+  box-shadow: 0 24px 48px -24px rgb(20 16 48 / 0.5);
+  overflow: hidden;
+}
+
+[data-running] [data-active] .modal {
+  animation: modalIn 420ms var(--ease-out) var(--at) both;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.8rem;
+  border-bottom: 1px solid var(--linha);
+}
+
+.modalTitle {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.closeBtn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--ui-radius-ctl);
+  background: color-mix(in srgb, var(--brand-blue) 7%, var(--branco));
+  color: var(--brand-blue);
+}
+
+.closeBtn svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.modalBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 0;
+  padding: 0.55rem 0.8rem 0;
+}
+
+/* Fixed window over the room list; the list scrolls down to the last operator */
+.modalViewport {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  margin-inline: -0.25rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent);
+  mask-image: linear-gradient(180deg, #000 88%, transparent);
+}
+
+.modalList {
+  position: absolute;
+  inset: 0.1rem 0.25rem auto;
+  display: grid;
+  gap: 0.45rem;
+  padding-bottom: 1rem;
+  transform: translateY(var(--scroll, 0px));
+}
+
+[data-running] [data-active] .modalList {
+  animation: listScroll 1600ms var(--ease-in-out) var(--scroll-at) both;
+}
+
+@keyframes listScroll {
+  from {
+    transform: translateY(0);
+  }
+}
+
+/* Same row as the orçamento's search results */
+.roomRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name price"
+    "op btn";
+  align-items: center;
+  gap: 0.35rem 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+/* .roomRow sets its own border, so restate the picked colour */
+.roomRow.pick {
+  border-color: var(--ui-selected-line);
+}
+
+.roomName {
+  grid-area: name;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roomOp {
+  grid-area: op;
+  justify-self: start;
+}
+
+.roomOp img {
+  object-position: left center;
+}
+
+.roomPrice {
+  grid-area: price;
+  justify-self: end;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.roomBtn {
+  grid-area: btn;
+  justify-self: end;
+  min-width: 6rem;
+  min-height: 2.1rem;
+  font-size: 0.875rem;
+}
+
+.roomRow .roomOp {
+  width: 4.5rem;
+  height: 1.6rem;
+}
+
+@container (min-width: 27rem) {
+  .roomRow {
+    grid-template-columns: minmax(0, 1fr) 5rem auto auto;
+    grid-template-areas: "name op price btn";
+    gap: 0.7rem;
+  }
+
+  .roomOp {
+    justify-self: center;
+  }
+
+  .roomOp img {
+    object-position: center;
+  }
+}
+
+@container (max-width: 30rem) {
+  .photo {
+    min-height: 6rem;
+  }
+
+  .regimeRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .regimeRow > .regime:nth-child(3) {
+    display: none;
+  }
+}
+
+/* ——— Operadores integrados ——— */
+
+.opGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.opTile {
+  display: grid;
+  place-items: center;
+  flex: 0 0 calc((100% - 3 * 0.75rem) / 4);
+  min-width: 0;
+  height: 6.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.opTileLogo {
+  width: 100%;
+  max-width: 9rem;
+  height: 3.6rem;
+}
+
+/* ——— Proposta em PDF: "A sua viagem" (as the Landing Page's ToolsMerge card) ——— */
+
+.trip {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.86em 1.046em;
+}
+
+.trip b {
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+/* Timeline: icon + title, the box under the title, a line joining the icons */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.86em;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 1em;
+  bottom: 1em;
+  left: 0.95em;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-blue) 9%, var(--linha));
+}
+
+.tlItem {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 1.9em minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  column-gap: 0.68em;
+  row-gap: 0.43em;
+  align-items: center;
+}
+
+.tlIcon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  color: var(--branco);
+  box-shadow: 0 0 0 3px var(--branco);
+}
+
+.tlIcon svg {
+  width: 0.985em;
+  height: 0.985em;
+}
+
+.trip .tlTitle {
+  display: flex;
+  align-items: center;
+  height: 1.9em;
+  font-weight: 700;
+}
+
+.tlBox,
+.asideBox {
+  min-width: 0;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+  overflow: hidden;
+}
+
+.tlBox {
+  grid-column: 2;
+  align-self: stretch;
+}
+
+/* Flight ticket */
+.ticket {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticketMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.74em;
+  padding: 0.68em 0.923em 0.6em;
+}
+
+.ticketEnd {
+  display: flex;
+  flex-direction: column;
+  gap: 0.123em;
+  line-height: 1.15;
+}
+
+.trip .ticketEnd b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.415em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ticketEnd small {
+  color: var(--ink-muted);
+  font-size: 0.846em;
+}
+
+.ticketEndRight {
+  align-items: flex-end;
+}
+
+.ticketPath {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  margin-bottom: 0.3em;
+  color: var(--ink-muted);
+  font-size: 0.846em;
+}
+
+.ticketPath i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 1.2em;
+}
+
+.ticketPath i::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1.5px dotted color-mix(in srgb, var(--violet) 40%, var(--linha));
+}
+
+.ticketPath svg {
+  position: relative;
+  box-sizing: content-box;
+  width: 1.25em;
+  height: 1.25em;
+  padding: 0 0.25em;
+  background: var(--branco);
+  color: var(--brand-orange);
+}
+
+.ticketFoot {
+  display: flex;
+  gap: 0.4em;
+  padding: 0.5em 0.923em;
+  border-top: 1px solid var(--linha);
+}
+
+.chipSoft {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.37em;
+  padding: 0.246em 0.615em;
+  border-radius: 999px;
+  background: var(--orange-soft);
+  color: var(--brand-orange-dark);
+  font-size: 0.846em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Hotel */
+.stay {
+  display: flex;
+  align-items: center;
+  gap: 0.74em;
+  padding: 0.55em;
+}
+
+.stayPhoto {
+  display: block;
+  flex-shrink: 0;
+  width: 4.6em;
+  height: 3.5em;
+  border-radius: var(--ui-radius-ctl);
+  background: var(--papel);
+  object-fit: cover;
+}
+
+.stayInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.123em;
+  min-width: 0;
+}
+
+.stayInfo b,
+.stayInfo small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stayInfo small {
+  color: var(--ink-muted);
+  font-size: 0.846em;
+}
+
+.stayStars {
+  color: var(--brand-orange);
+  font-size: 0.846em;
+  letter-spacing: 0.05em;
+}
+
+/* Insurance + extras */
+.addons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 0.123em 0.923em;
+}
+
+.addon {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.74em;
+  padding: 0.43em 0;
+  color: var(--ink-soft);
+  font-size: 0.923em;
+}
+
+.addon + .addon {
+  border-top: 1px solid var(--linha);
+}
+
+.addon span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addon b {
+  flex-shrink: 0;
+}
+
+/* Aside: price, PDF, payment */
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 0.615em;
+  min-width: 0;
+  padding-top: 2.33em;
+}
+
+.priceBox {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.37em;
+  padding: 0.74em 0.923em 0.8em;
+}
+
+.boxTitle {
+  padding-bottom: 0.55em;
+  margin-bottom: 0.123em;
+  border-bottom: 1px solid var(--linha);
+}
+
+.priceLine,
+.priceTotal {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.74em;
+}
+
+.priceLine {
+  color: var(--ink-soft);
+  font-size: 0.923em;
+}
+
+.priceLine span:last-child {
+  font-weight: 500;
+  color: var(--brand-blue);
+}
+
+.priceTotal {
+  align-items: baseline;
+  margin-top: auto;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--linha);
+}
+
+.priceTotal span {
+  color: var(--ink-muted);
+  font-size: 0.923em;
+  font-weight: 500;
+}
+
+.trip .priceTotal b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.415em;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.pdfBox {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.55em;
+  padding: 0.74em 0.74em 0.68em;
+  overflow: visible;
+}
+
+/* The generated PDF is the point of this demo: a faint violet wash and a
+   tinted border lift it above the other boxes, without a heavy fill */
+.asideBox.pdfBox {
+  border-color: color-mix(in srgb, var(--violet) 28%, var(--linha));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--violet-soft) 70%, var(--branco)) 0%,
+    var(--branco) 70%
+  );
+}
+
+.pdfRow {
+  display: flex;
+  align-items: center;
+  gap: 0.68em;
+  min-width: 0;
+}
+
+.pdfIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: var(--ui-radius-ctl);
+  background: var(--brand-blue);
+  color: var(--branco);
+}
+
+.pdfIcon svg {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.pdfText {
+  display: grid;
+  flex: 1;
+  gap: 0.1em;
+  min-width: 0;
+}
+
+.pdfText small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 0.846em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.pdfActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.37em;
+  margin-top: auto;
+}
+
+.softBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-width: 0;
+  min-height: 2.15em;
+  padding: 0 0.7em;
+  border-radius: var(--ui-radius-ctl);
+  background: var(--orange-soft);
+  color: var(--brand-orange-dark);
+  font-size: 0.923em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.softBtn svg {
+  flex-shrink: 0;
+  width: 1.07em;
+  height: 1.07em;
+}
+
+.payBtn {
+  min-height: 2.65em;
+}
+
+/* "Guardar orçamento" modal: centred over the stage, as in the platform */
+.saveBackdrop {
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.saveModal {
+  flex: 0 1 22rem;
+  gap: 0.6rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  overflow: visible;
+}
+
+.saveHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.saveTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.saveClose {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-ctl);
+  color: var(--ink);
+}
+
+.saveClose svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.saveText {
+  margin-bottom: 0.2rem;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.saveBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-ctl);
+  background: var(--branco);
+  color: var(--brand-blue);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.saveBtn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Confirmation: same look as "Reserva confirmada" in the orçamento demo */
+.done {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--branco) 94%, transparent);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.done b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  color: var(--brand-blue);
+}
+
+.doneIcon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-bottom: 0.25rem;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--branco);
+  box-shadow: 0 0 0 6px var(--success-soft);
+}
+
+.doneIcon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.doneText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.doneText svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* Pesquisa agrupada / proposta: the confirmation covers the modal too */
+.doneOverModal {
+  z-index: 11;
+}
+
+[data-running] [data-active] .done {
+  animation: showIn 450ms var(--ease-out) var(--at) both;
+}
+
+[data-running] [data-active] .doneIcon {
+  animation: donePop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--at) + 150ms) both;
+}
+
+@keyframes showIn {
+  from {
+    opacity: 0;
+    visibility: visible;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes donePop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@container (max-width: 30rem) {
+  .opTile {
+    flex-basis: calc((100% - 0.75rem) / 2);
+  }
+
+  .trip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aside {
+    padding-top: 0;
+  }
+}

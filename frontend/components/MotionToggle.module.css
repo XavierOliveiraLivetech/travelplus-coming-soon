@@ -1,0 +1,59 @@
+/* Standalone button reset — first, so the .badge sizes below win. (The globe
+   wraps a badge in its own button instead.) */
+.button {
+  padding: 0;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: 2px;
+}
+
+/*
+ * Pause / play badge shared by every looping demo — as quiet as the WCAG
+ * floor allows:
+ * - 1.5rem = 24px target (2.5.8 Target Size minimum; never go smaller)
+ * - icon at 55% ink on a faint disc ≈ 4:1 (1.4.11 asks for 3:1)
+ * No border, shadow or blur; full ink only on hover / keyboard focus.
+ */
+.badge {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--branco) 55%, transparent);
+  color: color-mix(in srgb, var(--brand-blue) 55%, var(--branco));
+  font-size: 0.7rem;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
+}
+
+.badge svg {
+  display: block;
+}
+
+.badge:hover,
+.badge:focus-visible,
+button:hover > .badge,
+button:focus-visible > .badge {
+  background: color-mix(in srgb, var(--branco) 85%, transparent);
+  color: var(--brand-blue);
+}
+
+/* On a dark band: no disc, light icon at ~60% (≈ 6:1 on the brand purple) */
+.onDark {
+  background: transparent;
+  color: color-mix(in srgb, var(--branco) 60%, transparent);
+}
+
+.onDark:hover,
+.onDark:focus-visible {
+  background: color-mix(in srgb, var(--branco) 12%, transparent);
+  color: var(--branco);
+}

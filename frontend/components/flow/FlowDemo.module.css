@@ -1,0 +1,1774 @@
+/* ——— "Tudo numa plataforma" demo for the problem section ——— */
+
+/* Landing Page design tokens, scoped here so they don't touch the Coming Soon theme */
+.visual,
+.motionToggle {
+  --brand-blue: #180048;
+  --brand-orange: #d87020;
+  --brand-orange-dark: #b85c18;
+  --branco: #ffffff;
+  --papel: #f7f5f2;
+  --linha: #e6e2dc;
+  --ink: #180048;
+  --ink-soft: #4a4660;
+  --ink-muted: #6b6780;
+  --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --ui-violet: var(--brand-blue);
+  --ui-violet-soft: color-mix(in srgb, var(--brand-blue) 7%, var(--branco));
+  --ui-orange-soft: color-mix(in srgb, var(--brand-orange) 12%, var(--branco));
+  --ui-success: #1f9d6b;
+  --ui-success-soft: color-mix(in srgb, var(--ui-success) 12%, var(--branco));
+  --ui-line: color-mix(in srgb, var(--brand-blue) 8%, var(--linha));
+  --ui-field-bg: color-mix(in srgb, var(--brand-blue) 3%, var(--branco));
+  --ui-selected-bg: color-mix(in srgb, var(--brand-blue) 6%, var(--branco));
+  --ui-selected-line: color-mix(in srgb, var(--brand-blue) 18%, var(--linha));
+  --ui-card-shadow:
+    0 1px 2px rgb(24 0 72 / 0.04),
+    0 18px 40px -18px rgb(24 0 72 / 0.22);
+  --ui-radius-card: 1rem;
+  --ui-radius-box: 0.7rem;
+  --ui-radius-ctl: 0.55rem;
+  --motion-fast: 150ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.visual {
+  font-family: var(--font-body);
+  text-align: left;
+  --violet: var(--ui-violet);
+  --violet-soft: var(--ui-violet-soft);
+  --orange-soft: var(--ui-orange-soft);
+  --success: var(--ui-success);
+  --success-soft: var(--ui-success-soft);
+  --field-bg: var(--ui-field-bg);
+  --soft-line: var(--ui-line);
+
+  position: relative;
+  width: 100%;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--ink);
+  user-select: none;
+  /* Keep the soft glow from widening the document (horizontal scroll) */
+  overflow-x: clip;
+}
+
+/* Soft brand glow behind the window (same language as "Como funciona") */
+.visual::before {
+  content: "";
+  position: absolute;
+  /* No negative horizontal inset — blur already softens the edge */
+  inset: 10% 0 -10% 10%;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--brand-orange) 22%, transparent),
+    transparent
+  );
+  filter: blur(24px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--soft-line);
+  border-radius: var(--ui-radius-card);
+  background: var(--branco);
+  overflow: hidden;
+  box-shadow: var(--ui-card-shadow);
+}
+
+/* Visitor paused the demo (MotionToggle): every running animation holds. */
+.paused,
+.paused *,
+.paused *::before,
+.paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* Pause / play badge just under the demo's right edge, clear of its content */
+.motionToggle {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0.25rem;
+  z-index: 2;
+}
+
+/* ——— Embedded: fills a parent frame (Coming Soon gallery window) ——— */
+
+.embedded {
+  height: 100%;
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+.embedded::before {
+  display: none;
+}
+
+.embedded .card {
+  /* Natural height (measured in JS); --fit scales it to the frame height */
+  width: calc(100% / var(--fit, 1));
+  height: auto;
+  min-height: 100%;
+  transform: scale(var(--fit, 1));
+  transform-origin: 0 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* In the gallery the app bar is the window's only header (as on the Landing
+   Page): grey dots, logo, steps. Only the current step shows its label, and
+   the progress segments are left out. */
+.embedded .step:not(.stepActive) {
+  padding-right: 0.32rem;
+}
+
+.embedded .step:not(.stepActive) .stepLabel {
+  display: none;
+}
+
+.embedded .progress {
+  display: none;
+}
+
+.embedded .stage {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.embedded .motionToggle {
+  top: auto;
+  bottom: 0.4rem;
+  right: auto;
+  left: 0.4rem;
+}
+
+/* ——— App bar: logo + flow stepper ——— */
+
+.appBar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.95rem;
+  border-bottom: 1px solid var(--linha);
+}
+
+.dots {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.dots i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--linha);
+}
+
+.logo {
+  flex-shrink: 0;
+  width: auto;
+  height: 1.55rem;
+  object-fit: contain;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.stepper[hidden] {
+  display: none;
+}
+
+/* Slot for a control at the bar's right end (the gallery's pause button).
+   The card is scaled by --fit, so the slot reserves the control's real width
+   and the control is scaled back up to its real size. */
+.barAction {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(1.5rem / var(--fit, 1));
+  height: 1.5rem;
+  margin-left: auto;
+}
+
+.stepper:not([hidden]) + .barAction {
+  margin-left: 0.25rem;
+}
+
+.barAction > * {
+  flex: none;
+  transform: scale(calc(1 / var(--fit, 1)));
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.32rem;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out),
+    padding 300ms var(--ease-out);
+}
+
+.stepIcon {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: var(--papel);
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out);
+}
+
+.stepIcon svg {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+.stepLabel {
+  display: none;
+  white-space: nowrap;
+}
+
+.stepActive {
+  padding-right: 0.6rem;
+  background: var(--orange-soft);
+  color: var(--brand-orange-dark);
+}
+
+.stepActive .stepIcon {
+  background: var(--brand-orange);
+  color: var(--branco);
+}
+
+.stepActive .stepLabel {
+  display: inline;
+}
+
+.stepDone .stepIcon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+/* Phones: 5 steps + logo must fit — drop the window dots, tighten the pills */
+@container (max-width: 26rem) {
+  .appBar {
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .dots {
+    display: none;
+  }
+
+  .logo {
+    height: 1.35rem;
+  }
+
+  .stepper {
+    gap: 0.1rem;
+  }
+
+  .step {
+    gap: 0.2rem;
+    padding: 0.2rem;
+  }
+
+  .stepActive {
+    padding-right: 0.45rem;
+  }
+
+  .stepLabel {
+    font-size: 0.625rem;
+  }
+}
+
+@container (min-width: 46rem) {
+  .stepLabel {
+    display: inline;
+  }
+
+  .step {
+    padding-right: 0.55rem;
+  }
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(var(--steps, 5), minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.55rem 0.95rem 0;
+  background: var(--branco);
+}
+
+.progress[hidden] {
+  display: none;
+}
+
+.progressSeg {
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-blue) 9%, var(--linha));
+  overflow: hidden;
+}
+
+/* A step turns solid brand purple as soon as the flow reaches it */
+.progressSeg i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-blue);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.progressDone i,
+.progressActive i {
+  opacity: 1;
+}
+
+/* ——— Stage: scenes stacked in one cell so height never jumps ——— */
+
+.stage {
+  position: relative;
+  display: grid;
+  background: var(--branco);
+}
+
+.scene {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 1rem 1rem 1.1rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(1.25rem);
+  transition:
+    opacity 380ms var(--ease-out),
+    transform 480ms var(--ease-out),
+    visibility 0s linear 480ms;
+}
+
+.sceneActive {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 420ms var(--ease-out) 120ms,
+    transform 520ms var(--ease-out) 120ms,
+    visibility 0s;
+}
+
+@container (min-width: 34rem) {
+  .scene {
+    gap: 0.85rem;
+    padding: 1.35rem 1.4rem 1.45rem;
+  }
+}
+
+.sceneLabel {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.sceneFoot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+/* ——— Shared bits ——— */
+
+.btnPrimary,
+.btnSoft {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 0.4rem;
+  border-radius: var(--ui-radius-ctl);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btnPrimary {
+  min-height: 2.15rem;
+  padding: 0 1rem;
+  background: var(--brand-orange);
+  color: var(--branco);
+  box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--brand-orange) 70%, transparent);
+}
+
+.btnPrimary svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Repeated on every room, so lighter than the primary CTA */
+.btnSoft {
+  min-height: 1.85rem;
+  padding: 0 0.7rem;
+  font-weight: 600;
+  background: var(--orange-soft);
+  color: var(--brand-orange-dark);
+  font-size: 0.75rem;
+}
+
+.chipSuccess {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Same as .chipSuccess in StepVisuals */
+.chipSuccess {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.chipSuccess svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/*
+ * Typed text: every character lands on its own keystroke (--d, uneven rhythm
+ * from PlatformFlow.tsx) and a caret rides on the newest one. The caret blinks
+ * briefly before the first keystroke and after the last, then disappears.
+ */
+.typed {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+
+.char {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+}
+
+.running .sceneActive .char {
+  animation: charIn 150ms var(--ease-out) calc(var(--at) + var(--d)) both;
+}
+
+@keyframes charIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.2em) scale(0.85);
+  }
+}
+
+.typed::before,
+.char::after {
+  content: "";
+  position: absolute;
+  top: 0.12em;
+  bottom: 0.12em;
+  width: 1.5px;
+  border-radius: 1px;
+  background: var(--brand-orange);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.typed::before {
+  left: 0;
+}
+
+.char::after {
+  right: -2px;
+}
+
+/* Waiting for the first keystroke */
+.running .sceneActive .typed::before {
+  animation: caretBlink 360ms linear calc(var(--at) - 360ms);
+}
+
+/* Visible only while this is the newest character */
+.running .sceneActive .char::after {
+  animation: caretOn var(--n) linear calc(var(--at) + var(--d));
+}
+
+/* Lingers until the next field takes over (FIELD_GAP in PlatformFlow.tsx) */
+.running .sceneActive .charLast::after {
+  animation: caretOn 140ms linear calc(var(--at) + var(--d));
+}
+
+@keyframes caretOn {
+  0%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  44% {
+    opacity: 1;
+  }
+  45%,
+  70% {
+    opacity: 0;
+  }
+  71%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* The passenger input being typed into looks focused (timings set per field in TSX) */
+.running .sceneActive .input {
+  animation: inputFocus var(--focus-dur, 0ms) var(--ease-out) var(--focus-at, 0ms);
+}
+
+@keyframes inputFocus {
+  0%,
+  100% {
+    border-color: var(--linha);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  10%,
+  88% {
+    border-color: var(--brand-orange);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-orange) 18%, transparent);
+  }
+}
+
+/* Generic "appear" for staggered items */
+.running .sceneActive .opChip,
+.running .sceneActive .resultRow,
+.running .sceneActive .insurance,
+.running .sceneActive .extraRow,
+.running .sceneActive .method {
+  animation: popIn 420ms var(--ease-out) var(--at) both;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.45rem) scale(0.98);
+  }
+}
+
+/* Cursor: glides in from --from onto its parent and clicks it */
+.cursor {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  z-index: 5;
+  width: 0.95rem;
+  height: 1.2rem;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgb(24 0 72 / 0.35));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 24' fill='none'%3E%3Cpath d='M1.2 1.1 16.4 11.2l-6.1 1.5 3.1 7.4-2.7 1.1-3.1-7.3-4.8 4.5Z' fill='%23fff' stroke='%231a1240' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.running .sceneActive .cursor {
+  animation: cursorClick 1300ms var(--ease-in-out) var(--at) both;
+}
+
+@keyframes cursorClick {
+  0% {
+    opacity: 0;
+    transform: translate(var(--from));
+  }
+  12% {
+    opacity: 1;
+    transform: translate(var(--from));
+  }
+  62% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.82);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+}
+
+/*
+ * One cursor, two clicks: lands on its parent (~800ms in), clicks, then slides
+ * down by --hop onto the next checkbox and clicks again (~2150ms in).
+ * Starts at --at = 3150ms → clicks at ~4000ms and ~5350ms, matching the
+ * extras' --check times (4050ms / 5400ms) in PlatformFlow.tsx.
+ */
+.running .sceneActive .cursorChain {
+  animation: cursorChain 2600ms var(--ease-in-out) var(--at) both;
+}
+
+@keyframes cursorChain {
+  0% {
+    opacity: 0;
+    transform: translate(var(--from));
+  }
+  6% {
+    opacity: 1;
+    transform: translate(var(--from));
+  }
+  30% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  34% {
+    transform: translate(0, 0) scale(0.82);
+  }
+  38%,
+  52% {
+    transform: translate(0, 0) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(0, var(--hop, 2rem));
+  }
+  84% {
+    transform: translate(0, var(--hop, 2rem)) scale(0.82);
+  }
+  88% {
+    opacity: 1;
+    transform: translate(0, var(--hop, 2rem)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, var(--hop, 2rem));
+  }
+}
+
+/* Target button reacts to the click */
+.running .sceneActive .pressable {
+  animation: press 380ms var(--ease-out) var(--press) both;
+}
+
+@keyframes press {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.94);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-orange) 30%, transparent);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ——— 1 · Search ——— */
+
+.searchBar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--soft-line);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+  box-shadow: 0 10px 24px -18px rgb(24 0 72 / 0.35);
+}
+
+.field {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+}
+
+.field:nth-child(odd) {
+  border-right: 1px solid var(--linha);
+}
+
+.field:nth-child(-n + 2) {
+  border-bottom: 1px solid var(--linha);
+}
+
+.field small {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.fieldValue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-height: 1.1rem;
+  font-weight: 500;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.fieldIcon {
+  flex-shrink: 0;
+  width: 0.8rem;
+  height: 0.8rem;
+  color: var(--ink-muted);
+}
+
+@container (min-width: 34rem) {
+  .searchBar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .field:nth-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .field:not(:last-child) {
+    border-right: 1px solid var(--linha);
+  }
+}
+
+.connected {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem 0.7rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.connectedHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Same label style as the search fields */
+.connectedHead small {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.connectedHead .chipSuccess {
+  padding: 0.12rem 0.45rem;
+  font-size: 0.625rem;
+}
+
+.connectedHead .chipSuccess svg {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+.searchFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.searching {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.searching i {
+  flex-shrink: 0;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid color-mix(in srgb, var(--brand-orange) 25%, transparent);
+  border-top-color: var(--brand-orange);
+  border-radius: 50%;
+}
+
+.running .sceneActive .searching {
+  animation: popIn 360ms var(--ease-out) var(--at) both;
+}
+
+.running .sceneActive .searching i {
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ——— 2 · Results from several operators ——— */
+
+.resultsHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.resultsCount {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--brand-orange-dark);
+}
+
+.opChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.opChip {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  height: 1.75rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--linha);
+  border-radius: 0.45rem;
+  background: var(--branco);
+}
+
+.opLogo {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 1.3rem;
+}
+
+@container (min-width: 34rem) {
+  .opChip {
+    padding: 0 0.45rem;
+  }
+
+  .opLogo {
+    width: 3.3rem;
+  }
+}
+
+/* Fixed grid track so the image's 100% height resolves (square logos stay inside) */
+.opLogo {
+  grid-template: 100% / 100%;
+  overflow: hidden;
+}
+
+.opLogo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.opLogoText {
+  max-width: 100%;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fixed window over the room list; the list scrolls through every operator */
+.resultsViewport {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 12.75rem;
+  margin-inline: -0.25rem;
+  padding: 0.1rem 0.25rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 85%, transparent);
+  mask-image: linear-gradient(180deg, #000 85%, transparent);
+}
+
+/* Out of flow so the long list never stretches the card */
+.results {
+  position: absolute;
+  inset: 0.1rem 0.25rem auto;
+  display: grid;
+  gap: 0.45rem;
+  padding-bottom: 0.6rem;
+}
+
+.running .sceneActive .results {
+  animation: resultsScroll 2600ms var(--ease-in-out) 1500ms both;
+}
+
+@keyframes resultsScroll {
+  0% {
+    transform: translateY(0);
+  }
+  58%,
+  70% {
+    transform: translateY(var(--scroll, 0px));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.resultRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "text price"
+    "op btn";
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.resultText {
+  grid-area: text;
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.resultText b {
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.resultPrice small {
+  font-size: 0.6875rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Same size as the operator chips above… */
+.resultOp {
+  grid-area: op;
+  justify-self: start;
+  width: 2.75rem;
+  height: 1.3rem;
+}
+
+/* …except Solférias: its square mark needs the extra room to stay legible */
+.resultOp[data-op="solferias"] {
+  width: 4.25rem;
+  height: 1.7rem;
+}
+
+/* Stacked layout: logos sit left under the room name, so pin the image to the
+   left edge too (the square Solférias mark would otherwise float mid-box) */
+.resultOp img {
+  object-position: left center;
+}
+
+@container (min-width: 27rem) {
+  .resultOp img {
+    object-position: center;
+  }
+}
+
+.resultPrice {
+  grid-area: price;
+  display: grid;
+  justify-items: end;
+  gap: 0.05rem;
+}
+
+.resultPrice b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.95rem;
+  color: var(--brand-blue);
+}
+
+.resultRow .btnSoft {
+  grid-area: btn;
+  justify-self: end;
+}
+
+@container (min-width: 27rem) {
+  .resultsViewport {
+    min-height: 10.5rem;
+  }
+
+  .resultRow {
+    grid-template-columns: minmax(0, 1fr) 4.25rem auto auto;
+    grid-template-areas: "text op price btn";
+    gap: 0.7rem;
+  }
+
+  .resultOp {
+    justify-self: center;
+  }
+}
+
+@container (min-width: 34rem) {
+  .resultOp:not([data-op="solferias"]) {
+    width: 3.3rem;
+  }
+}
+
+/* The picked result gets highlighted right after the click */
+.running .sceneActive .resultPick {
+  animation:
+    popIn 420ms var(--ease-out) var(--at) both,
+    pickRow 500ms var(--ease-out) 5200ms both;
+}
+
+/* Picked room: border only, no background wash */
+@keyframes pickRow {
+  to {
+    border-color: var(--ui-selected-line);
+  }
+}
+
+/* ——— 3 · Insurance + extras · 4 · Passengers ——— */
+
+.bookingHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bookingTotal {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+/* Total goes up when the insurance is picked */
+.totalSwap {
+  display: inline-grid;
+  justify-items: end;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.totalStep {
+  grid-area: 1 / 1;
+  opacity: 0;
+}
+
+/* Static / reduced-motion state shows the final total */
+.totalLast {
+  opacity: 1;
+}
+
+/* Each value fades in at --in and out at --out (forwards only, so the
+   out-animation can't override the in-animation's backwards fill) */
+.running .sceneActive .totalStep {
+  animation:
+    totalIn 420ms var(--ease-out) var(--in) both,
+    totalOut 280ms var(--ease-out) var(--out) forwards;
+}
+
+.running .sceneActive .totalFirst {
+  animation: totalOut 280ms var(--ease-out) var(--out) both;
+}
+
+.running .sceneActive .totalLast {
+  animation: totalIn 420ms var(--ease-out) var(--in) both;
+}
+
+@keyframes totalOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+}
+
+@keyframes totalIn {
+  0% {
+    opacity: 0;
+    transform: translateY(0.4rem);
+    color: var(--brand-blue);
+  }
+  50% {
+    color: var(--brand-orange);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    color: var(--brand-blue);
+  }
+}
+
+.block {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem 0.6rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* Same tile as the hotel icon in "Como funciona" */
+.panelIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: var(--ui-radius-ctl);
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.panelIcon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.panelText {
+  display: grid;
+  flex: 1;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.panelText b {
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+/* Included base insurance, shown above the optional upgrades */
+/* Included base insurance: one compact row above the optional upgrades */
+
+.insurances {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.insurance {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.4rem 0.5rem 0.45rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-ctl);
+  background: var(--branco);
+}
+
+.insurance > b {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.insurancePrice {
+  margin-top: 0.1rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.insurancePrice small {
+  margin-left: 0.1rem;
+  font-family: var(--font-body, inherit);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.insuranceBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 1.35rem;
+  margin-top: 0.2rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--brand-blue) 7%, var(--branco));
+  color: var(--brand-blue);
+  font-size: 0.625rem;
+  font-weight: 500;
+}
+
+.btnIdle,
+.btnDone {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+
+.btnDone {
+  font-weight: 600;
+}
+
+.btnDone svg {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+/* Final (static) state: the picked insurance is selected — same look as
+   the selected plan in "Como funciona" (light brand-purple fill + brand check) */
+.insurancePick {
+  border-color: color-mix(in srgb, var(--brand-orange) 45%, var(--linha));
+  background: var(--branco);
+}
+
+.insurancePick .insuranceBtn {
+  background: var(--orange-soft);
+  color: var(--brand-orange-dark);
+}
+
+.insurancePick .btnIdle {
+  opacity: 0;
+}
+
+.running .sceneActive .insurancePick {
+  animation:
+    popIn 420ms var(--ease-out) var(--at) both,
+    insurancePick 360ms var(--ease-out) 2250ms both;
+}
+
+.running .sceneActive .insurancePick .insuranceBtn {
+  animation:
+    press 380ms var(--ease-out) var(--press) both,
+    insuranceBtnOn 300ms var(--ease-out) 2250ms both;
+}
+
+.running .sceneActive .insurancePick .btnIdle {
+  animation: fadeOut 200ms linear 2250ms both;
+}
+
+.running .sceneActive .insurancePick .btnDone {
+  animation: popIn 300ms var(--ease-out) 2300ms both;
+}
+
+@keyframes insurancePick {
+  from {
+    border-color: var(--linha);
+    background: var(--branco);
+  }
+}
+
+@keyframes insuranceBtnOn {
+  from {
+    background: color-mix(in srgb, var(--brand-blue) 7%, var(--branco));
+    color: var(--brand-blue);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.extrasList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.extraRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.1rem;
+}
+
+/* Holds the cursor that hops down to the next row — keep it above later rows */
+.extraRowLead {
+  position: relative;
+  z-index: 2;
+}
+
+.extraRow + .extraRow {
+  border-top: 1px solid var(--linha);
+}
+
+/* Checkbox the cursor ticks (final state = checked) */
+.extraBox {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--brand-orange);
+  border-radius: 0.3rem;
+  background: var(--brand-orange);
+  color: var(--branco);
+}
+
+.extraBox svg {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+.extraBox .cursor {
+  top: 40%;
+  left: 40%;
+}
+
+.extraPrice {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.running .sceneActive .extraBox {
+  animation:
+    press 380ms var(--ease-out) calc(var(--check) - 100ms) both,
+    extraBoxOn 260ms var(--ease-out) var(--check) both;
+}
+
+.running .sceneActive .extraBox svg {
+  animation: successPop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--check) both;
+}
+
+@keyframes extraBoxOn {
+  from {
+    border-color: color-mix(in srgb, var(--brand-blue) 30%, var(--linha));
+    background: var(--branco);
+  }
+}
+
+.extraText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.extraText b {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Same look as the active step pill in the app bar */
+
+.passengerFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+/* Same field as the search bar: tiny uppercase label + value */
+.input {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-ctl);
+  background: var(--field-bg);
+  font-weight: 500;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.input small {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@container (min-width: 34rem) {
+  .passengerFields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ——— 4 · Payment ——— */
+
+/* Segmented control */
+
+/* Sized to its content, not the full scene width */
+.methods {
+  display: grid;
+  justify-self: start;
+  align-self: flex-start;
+  min-width: 18rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+  overflow: visible;
+}
+
+.method {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.method + .method {
+  border-top: 1px solid var(--linha);
+}
+
+.radio {
+  position: relative;
+  flex-shrink: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1.5px solid color-mix(in srgb, var(--brand-blue) 30%, var(--linha));
+  border-radius: 50%;
+}
+
+.radio .cursor {
+  top: 40%;
+  left: 40%;
+}
+
+.methodPick {
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+/* Picked method row gets the shared "selected" wash */
+.methodPick::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: calc(var(--ui-radius-box) - 1px) calc(var(--ui-radius-box) - 1px) 0 0;
+  background: var(--ui-selected-bg);
+}
+
+.methodPick .radio {
+  border-color: var(--brand-blue);
+  background: radial-gradient(circle, var(--brand-blue) 0 40%, transparent 45%);
+}
+
+.running .sceneActive .methodPick {
+  animation:
+    popIn 420ms var(--ease-out) var(--at) both,
+    methodRow 300ms var(--ease-out) 1450ms both;
+}
+
+.running .sceneActive .methodPick .radio {
+  animation: radioOn 300ms var(--ease-out) 1450ms both;
+}
+
+@keyframes methodRow {
+  from {
+    color: var(--ink-soft);
+  }
+  to {
+    color: var(--brand-blue);
+  }
+}
+
+@keyframes methodWash {
+  from {
+    opacity: 0;
+  }
+}
+
+.running .sceneActive .methodPick::before {
+  animation: methodWash 300ms var(--ease-out) 1450ms both;
+}
+
+@keyframes radioOn {
+  from {
+    border-color: color-mix(in srgb, var(--brand-blue) 30%, var(--linha));
+    background: transparent;
+  }
+}
+
+.paySummary {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.6rem 0.75rem 0.65rem;
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-radius-box);
+  background: var(--branco);
+}
+
+.running .sceneActive .paySummary {
+  animation: popIn 420ms var(--ease-out) var(--at) both;
+}
+
+.paySummaryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.1rem;
+  border-bottom: 1px solid var(--linha);
+}
+
+.paySummaryTrip {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.paySummaryTrip b {
+  font-weight: 600;
+  color: var(--brand-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paySummaryOp {
+  flex-shrink: 0;
+}
+
+.paySummaryLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.paySummaryLine span:last-child {
+  font-weight: 500;
+  color: var(--brand-blue);
+}
+
+/* Same as the "Valor total" row of the booking card in "Como funciona" */
+.payFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--linha);
+}
+
+.payTotal {
+  display: grid;
+  gap: 0.05rem;
+}
+
+.payTotal small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.payTotal b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--brand-blue);
+}
+
+/* Confirmation overlay — hidden unless the payment scene is running */
+.success {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--branco) 94%, transparent);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.success b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  color: var(--brand-blue);
+}
+
+.successIcon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-bottom: 0.25rem;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--branco);
+  box-shadow: 0 0 0 6px var(--success-soft);
+}
+
+.successIcon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.running .sceneActive .success {
+  animation: successIn 450ms var(--ease-out) 3050ms both;
+}
+
+.running .sceneActive .successIcon {
+  animation: successPop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 3200ms both;
+}
+
+/* Leaving the payment scene: the confirmation stays on top while the scene
+   fades out, so the payment form never flashes back before the loop
+   restarts. visibility: inherit hides it with the scene once the fade ends. */
+.running .scene:not(.sceneActive) .success {
+  opacity: 1;
+  visibility: inherit;
+}
+
+@keyframes successIn {
+  from {
+    opacity: 0;
+    visibility: visible;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes successPop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene,
+  .sceneActive,
+  .step,
+  .stepIcon {
+    transition: none;
+  }
+}
+
+/*
+  Small phones (card under ~21rem, e.g. 320–375px screens):
+  three insurance cards side by side don't fit, so they become stacked rows
+  (name/cover · price · button), and long sub-labels truncate instead of wrapping.
+*/
+@container (max-width: 21rem) {
+  .insurances {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+
+  .insurance {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "name price btn";
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0;
+    padding: 0.35rem 0.4rem 0.35rem 0.55rem;
+  }
+
+  .insurance > b {
+    grid-area: name;
+  }
+
+  .insurancePrice {
+    grid-area: price;
+    margin-top: 0;
+    white-space: nowrap;
+  }
+
+  /* "/pessoa" is dropped here so the plan names fit in full */
+  .insurancePrice small {
+    display: none;
+  }
+
+  .insuranceBtn {
+    grid-area: btn;
+    min-width: 4.6rem;
+    margin-top: 0;
+    padding-inline: 0.4rem;
+  }
+
+  .field {
+    padding: 0.5rem 0.55rem;
+  }
+
+  .fieldValue {
+    gap: 0.25rem;
+    font-size: 0.75rem;
+  }
+}
