@@ -3,16 +3,35 @@
 import { withBasePath } from "@/lib/basePath";
 import { useEffect, useRef, useState } from "react";
 
-const VIDEO_SRC = withBasePath(encodeURI("/Video/Video.mp4"));
+// ?v=2: remuxed with the index (moov) first so playback starts without a
+// second request for the end of the file. Video frames are bit-identical.
+const VIDEO_SRC = withBasePath(encodeURI("/Video/Video.mp4") + "?v=2");
 const IMAGE_SRC = withBasePath("/Img/Background.webp");
 
 export default function BackgroundMedia() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
   const [isVideoReady, setIsVideoReady] = useState(false);
+
+  // The 12 MB video only starts downloading once the page has loaded, so it
+  // doesn't compete with the CSS, JS, font and images the first paint needs.
+  // Until then the background image shows, exactly as it did while the video
+  // was buffering.
+  useEffect(() => {
+    const start = () => setVideoSrc(VIDEO_SRC);
+
+    if (document.readyState === "complete") {
+      start();
+      return;
+    }
+
+    window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoSrc) return;
 
     const revealVideo = () => {
       video
@@ -31,7 +50,7 @@ export default function BackgroundMedia() {
     return () => {
       video.removeEventListener("canplaythrough", revealVideo);
     };
-  }, []);
+  }, [videoSrc]);
 
   return (
     <div className="coming-soon-background">
@@ -45,7 +64,7 @@ export default function BackgroundMedia() {
       <video
         ref={videoRef}
         className={`coming-soon-background-video${isVideoReady ? " is-ready" : ""}`}
-        src={VIDEO_SRC}
+        src={videoSrc}
         muted
         loop
         playsInline
