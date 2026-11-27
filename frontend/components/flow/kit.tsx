@@ -17,7 +17,7 @@ import styles from "./FlowDemo.module.css";
 
 export { styles as flowStyles };
 
-/** Logos live in /public/operators/<id>.png. */
+/** Logos live in /public/operators/<id>.webp (generated from <id>.png by `npm run optimize:images`). */
 export const OPERATORS = [
   { id: "newblue", name: "Newblue" },
   { id: "solferias", name: "Solférias" },
@@ -90,7 +90,7 @@ export function OperatorLogo({ id, className }: { id: OperatorId; className?: st
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={imgRef}
-          src={assetPath(`/operators/${id}.png`)}
+          src={assetPath(`/operators/${id}.webp`)}
           alt=""
           onError={() => setFailed(true)}
         />

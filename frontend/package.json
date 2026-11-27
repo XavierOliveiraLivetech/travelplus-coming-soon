@@ -8,7 +8,8 @@
     "start": "npx --yes serve out",
     "lint": "eslint",
     "record:pesquisa-hilton": "node scripts/record-pesquisa-hilton.mjs",
-    "remux:sneaks": "node scripts/remux-sneaks.mjs"
+    "remux:sneaks": "node scripts/remux-sneaks.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "motion": "^14.9.1",
@@ -25,6 +26,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.4",
     "playwright": "^1.52.0",
+    "sharp": "^0.34.5",
     "typescript": "^5"
   }
 }

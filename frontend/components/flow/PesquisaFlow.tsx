@@ -123,6 +123,9 @@ function HotelPage() {
             <img
               src={PHOTO_POOL}
               alt=""
+              // Only slides in ~2s into the demo: keep it out of React's
+              // high-priority preloads so it doesn't compete with CSS/JS.
+              fetchPriority="low"
               className={s.photoNext}
               style={{ "--done": `${PHOTO_CLICK + 60}ms` } as CssVars}
             />
