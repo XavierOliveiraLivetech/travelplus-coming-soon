@@ -8,7 +8,7 @@ import { withBasePath } from "@/lib/basePath";
 import { fadeIn, fadeUp, pageStagger, staggerPassThrough } from "@/lib/motion";
 import { MotionConfig, motion } from "motion/react";
 
-const LIVETECH_LOGO_SRC = withBasePath("/Logos/Livetech.png");
+const LIVETECH_LOGO_SRC = withBasePath("/Logos/Livetech.webp");
 
 export default function Home() {
   return (

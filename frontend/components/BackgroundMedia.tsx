@@ -4,7 +4,7 @@ import { withBasePath } from "@/lib/basePath";
 import { useEffect, useRef, useState } from "react";
 
 const VIDEO_SRC = withBasePath(encodeURI("/Video/Video.mp4"));
-const IMAGE_SRC = withBasePath("/Img/Background.jpg?v=2");
+const IMAGE_SRC = withBasePath("/Img/Background.webp");
 
 export default function BackgroundMedia() {
   const videoRef = useRef<HTMLVideoElement>(null);

@@ -13,7 +13,7 @@ import { useSectionActive } from "@/lib/useSectionActive";
 import { MotionToggle } from "../MotionToggle";
 import styles from "./FlowDemo.module.css";
 
-const LOGO_SRC = assetPath("/brand/logo-mark.png");
+const LOGO_SRC = assetPath("/brand/logo-mark.webp");
 
 export type FlowScene = {
   key: string;
